@@ -1,0 +1,34 @@
+server:
+    port: 8080
+
+spring:
+    datasource:
+        url: jdbc:mysql://127.0.0.1:3306/api?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+        username: 
+        password: 
+    jpa:
+        show-sql: true
+
+endpoints:
+    shutdown:
+        sensitive: false
+        enabled: true
+
+management:
+    address: 127.0.0.1
+    port: 9000
+    security:
+        enabled: false
+
+com:
+    mtdhb:
+        api:
+            nodejs:
+                url: http://127.0.0.1:3333
+                check-cookie: /check-cookie
+                get-hongbao: /get-hongbao
+            mail:
+                register-mail-subject: 一键领取手气最佳红包-注册
+                register-mail-effective-time: 30
+                reset-password-mail-subject: 一键领取手气最佳红包-重置密码
+                reset-password-mail-effective-time: 30
