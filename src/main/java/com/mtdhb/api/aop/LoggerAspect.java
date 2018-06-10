@@ -22,11 +22,11 @@ public class LoggerAspect {
 
     private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    @Pointcut("execution(* com.mtdhb.leaf.web.home.*.*(..))")
+    @Pointcut("execution(* com.mtdhb.api.web.home.*.*(..))")
     private void controller() {
     }
 
-    @Pointcut("execution(* com.mtdhb.leaf.service.impl.*.*(..))")
+    @Pointcut("execution(* com.mtdhb.api.service.impl.*.*(..))")
     private void service() {
     }
 

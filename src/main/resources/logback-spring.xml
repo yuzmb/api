@@ -5,7 +5,7 @@
 
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
     <!-- default values can be specified using the ":-" operator -->
-    <property name="LOG_PATH" value="${java.io.tmpdir:-/tmp}/leaf/log" />
+    <property name="LOG_PATH" value="${java.io.tmpdir:-/tmp}/api/log" />
     <property name="INFO_LOG_FILE" value="${LOG_PATH}/info" />
     <property name="WARN_LOG_FILE" value="${LOG_PATH}/warn" />
     <property name="ERROR_LOG_FILE" value="${LOG_PATH}/error" />
