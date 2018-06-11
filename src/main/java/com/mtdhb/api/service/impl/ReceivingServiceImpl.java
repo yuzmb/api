@@ -314,9 +314,11 @@ public class ReceivingServiceImpl implements ReceivingService {
                 }
             });
 
+            // TODO 可更优化为 mysql native 批量插入
             if (cookieCounts.size() > 0) {
-                // TODO 可更优化为 mysql native 批量插入
                 cookieCountRepository.save(cookieCounts);
+            }
+            if (cookieMarks.size() > 0) {
                 cookieMarkRepository.save(cookieMarks);
             }
             if (resultDTO.getCode() != 0) {
