@@ -1,10 +1,7 @@
 package com.mtdhb.api.web;
 
 import java.lang.invoke.MethodHandles;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,14 +40,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BindException.class)
     public Result handleBindException(BindException e) {
         logger.warn(e.getMessage(), e);
-        List<FieldError> fieldErrors = e.getFieldErrors();
-        Map<String, String> data = new HashMap<>(fieldErrors.size());
-        Iterator<FieldError> iterator = fieldErrors.iterator();
-        while (iterator.hasNext()) {
-            FieldError fieldError = iterator.next();
-            data.put(fieldError.getField(), fieldError.getDefaultMessage());
-        }
-        return Results.error(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(), data);
+        return Results.error(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                e.getFieldErrors().stream()
+                        .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage)));
     }
 
     @ExceptionHandler(RuntimeException.class)
