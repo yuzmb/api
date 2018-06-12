@@ -26,7 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 由于免费企业邮外发邮件次数限制，所以需要配置多个企业邮
+ * TODO 由于免费企业邮箱有发送数量和频率的限制，不足以支撑我们网站的发件量, 而我们又买不起收费的，曾导致大量注册我们网站的用户收不到注册邮件。
+ * 所以我们采取配置多个免费企业邮箱解决方式。目前配置较为麻烦，有待优化
  * 
  * @author i@huangdenghe.com
  * @date 2018/03/17
@@ -35,6 +36,9 @@ public class Mails {
 
     private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+    /**
+     * 企业邮箱配置的数量
+     */
     private static final int SIZE = 4;
     private static final Properties[] PROPERTIES = new Properties[SIZE];
     private static final AtomicInteger INTEGER = new AtomicInteger();
