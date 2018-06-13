@@ -177,7 +177,7 @@ public class UserController {
         URL spec = null;
         try {
             // 支持 url.cn 的短链接
-            if (url.startsWith("https://url.cn/")) {
+            if (url.startsWith("https://url.cn/") || url.startsWith("http://url.cn/")) {
                 url = Connections.getRedirectURL(url);
             }
             spec = new URL(url);
