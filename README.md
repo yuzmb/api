@@ -13,6 +13,8 @@ Redis 4.0.9
 
 JDK 1.8+
 
+Nginx 1.12.2
+
 ## MySQL
 
 ```
