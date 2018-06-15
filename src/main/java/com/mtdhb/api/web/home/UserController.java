@@ -230,13 +230,9 @@ public class UserController {
     }
 
     private String getParmeter(String query, String name) {
-        String value = null;
         Optional<String> optional = Stream.of(query.split("&")).filter(keyValue -> keyValue.trim().startsWith(name))
                 .map(keyValue -> keyValue.split("=")[1]).findFirst();
-        if (optional.isPresent()) {
-            value = optional.get();
-        }
-        return value;
+        return optional.orElse(null);
     }
 
     private void captcha(String sessionKey, HttpSession session, HttpServletResponse response) throws IOException {
