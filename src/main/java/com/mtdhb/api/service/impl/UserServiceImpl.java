@@ -29,6 +29,7 @@ import com.mtdhb.api.dao.CookieRepository;
 import com.mtdhb.api.dao.UserRepository;
 import com.mtdhb.api.dao.VerificationRepository;
 import com.mtdhb.api.dto.AccountDTO;
+import com.mtdhb.api.dto.NumberDTO;
 import com.mtdhb.api.dto.UserDTO;
 import com.mtdhb.api.entity.User;
 import com.mtdhb.api.entity.Verification;
@@ -168,10 +169,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public long getAvailable(ThirdPartyApplication application, long userId) {
+        return getNumber(application, userId).getAvailable();
+    }
+
+    @Override
+    public NumberDTO getNumber(ThirdPartyApplication application, long userId) {
         long total = cookieRepository.countByApplicationAndUserId(application, userId) * 5;
         long used = cookieCountRepository.countByApplicationAndUserIdAndGmtCreateGreaterThan(application, userId,
                 Timestamp.valueOf(LocalDateTime.of(LocalDate.now(), LocalTime.ofSecondOfDay(0))));
-        return total - used;
+        NumberDTO numberDTO = new NumberDTO();
+        numberDTO.setAvailable(total - used);
+        numberDTO.setTotal(total);
+        return numberDTO;
     }
 
     private void sendMail(String mail, Purpose purpose, String subject, String template) {

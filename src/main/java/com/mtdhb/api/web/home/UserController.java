@@ -170,8 +170,6 @@ public class UserController {
         String key = null;
         ThirdPartyApplication application = null;
         ReceivingDTO receivingDTO = null;
-        // 某些地方复制出的链接带 &amp; 而不是 &
-        url = url.replace("&amp;", "&");
         // 很多用户用手机复制链接的时候会带上末尾的 ]
         if (url.endsWith("]")) {
             url = url.substring(0, url.length() - 1);
@@ -223,12 +221,21 @@ public class UserController {
         return Results.success(receivingDTO);
     }
 
+    @Deprecated
     @RequestMapping(value = "/available")
     public Result available() {
         UserDTO userDTO = RequestContextHolder.get();
         return Results.success(Stream.of(ThirdPartyApplication.values())
                 .collect(Collectors.toMap(application -> application.name().toLowerCase(),
                         application -> userService.getAvailable(application, userDTO.getId()))));
+    }
+
+    @RequestMapping(value = "/number")
+    public Result number() {
+        UserDTO userDTO = RequestContextHolder.get();
+        return Results.success(Stream.of(ThirdPartyApplication.values())
+                .collect(Collectors.toMap(application -> application.name().toLowerCase(),
+                        application -> userService.getNumber(application, userDTO.getId()))));
     }
 
     private String getParmeter(String query, String name) {
