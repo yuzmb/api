@@ -188,7 +188,7 @@ public class UserController {
         if (url.startsWith("https://h5.ele.me/hongbao/")) {
             key = getParmeter(spec.getRef(), "sn");
             application = ThirdPartyApplication.ELE;
-        } else if (url.startsWith("https://activity.waimai.meituan.com/")) {
+        } else if (url.startsWith("https://activity.waimai.meituan.com/") || url.startsWith("http://activity.waimai.meituan.com/")) {
             key = getParmeter(spec.getQuery(), "urlKey");
             application = ThirdPartyApplication.MEITUAN;
         }
