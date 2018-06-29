@@ -12,7 +12,8 @@ CREATE TABLE `cookie` (
   `gmt_create` datetime NOT NULL,
   `gmt_modified` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_open_id` (`open_id`)
+  UNIQUE KEY `uk_open_id` (`open_id`),
+  KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `cookie_count`;
@@ -26,7 +27,8 @@ CREATE TABLE `cookie_count` (
   `receiving_id` bigint(20) NOT NULL,
   `gmt_create` datetime NOT NULL,
   `gmt_modified` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `cookie_mark`;
@@ -59,7 +61,9 @@ CREATE TABLE `receiving` (
   `user_id` bigint(20) NOT NULL,
   `gmt_create` datetime NOT NULL,
   `gmt_modified` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_url_key` (`url_key`),
+  KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
