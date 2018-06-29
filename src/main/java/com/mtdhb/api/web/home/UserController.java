@@ -93,40 +93,26 @@ public class UserController {
 
     @RequestMapping(value = "/registerMail", method = RequestMethod.POST)
     public Result registerMail(@Valid MailDTO mailDTO, HttpSession session) {
-        String captcha = mailDTO.getCaptcha();
-        String sessionCaptcha = (String) session.getAttribute(SessionKeys.REGISTER_CAPTCHA);
-        session.removeAttribute(SessionKeys.REGISTER_CAPTCHA);
-        logger.info("sessionCaptcha={}", sessionCaptcha);
-        if (!captcha.equalsIgnoreCase(sessionCaptcha)) {
-            throw new BusinessException(ErrorCode.CAPTCHA_ERROR, "captcha={}, sessionCaptcha={}", captcha,
-                    sessionCaptcha);
-        }
+        checkCaptcha(mailDTO.getCaptcha(), SessionKeys.REGISTER_CAPTCHA, session);
         userService.sendRegisterMail(mailDTO.getMail());
         return Results.success(true);
     }
 
     @RequestMapping("/registerCaptcha")
     public void registerCaptcha(HttpSession session, HttpServletResponse response) throws IOException {
-        captcha(SessionKeys.REGISTER_CAPTCHA, session, response);
+        writeCaptcha(SessionKeys.REGISTER_CAPTCHA, session, response);
     }
 
     @RequestMapping(value = "/resetPasswordMail", method = RequestMethod.POST)
     public Result resetPasswordMail(@Valid MailDTO mailDTO, HttpSession session) {
-        String captcha = mailDTO.getCaptcha();
-        String sessionCaptcha = (String) session.getAttribute(SessionKeys.RESET_PASSWORD_CAPTCHA);
-        session.removeAttribute(SessionKeys.RESET_PASSWORD_CAPTCHA);
-        logger.info("sessionCaptcha={}", sessionCaptcha);
-        if (!captcha.equalsIgnoreCase(sessionCaptcha)) {
-            throw new BusinessException(ErrorCode.CAPTCHA_ERROR, "captcha={}, sessionCaptcha={}", captcha,
-                    sessionCaptcha);
-        }
+        checkCaptcha(mailDTO.getCaptcha(), SessionKeys.RESET_PASSWORD_CAPTCHA, session);
         userService.sendResetPasswordMail(mailDTO.getMail());
         return Results.success(true);
     }
 
     @RequestMapping("/resetPasswordCaptcha")
     public void resetPasswordCaptcha(HttpSession session, HttpServletResponse response) throws IOException {
-        captcha(SessionKeys.RESET_PASSWORD_CAPTCHA, session, response);
+        writeCaptcha(SessionKeys.RESET_PASSWORD_CAPTCHA, session, response);
     }
 
     @RequestMapping(value = "/cookie", method = RequestMethod.POST)
@@ -247,7 +233,17 @@ public class UserController {
         return optional.orElse(null);
     }
 
-    private void captcha(String sessionKey, HttpSession session, HttpServletResponse response) throws IOException {
+    private void checkCaptcha(String captcha, String sessionKey, HttpSession session) {
+        String sessionCaptcha = (String) session.getAttribute(sessionKey);
+        session.removeAttribute(sessionKey);
+        logger.info("sessionCaptcha={}", sessionCaptcha);
+        if (!captcha.equalsIgnoreCase(sessionCaptcha)) {
+            throw new BusinessException(ErrorCode.CAPTCHA_ERROR, "captcha={}, sessionCaptcha={}", captcha,
+                    sessionCaptcha);
+        }
+    }
+
+    private void writeCaptcha(String sessionKey, HttpSession session, HttpServletResponse response) throws IOException {
         Captcha captcha = new Captcha();
         String code = captcha.getCode();
         logger.info("{} captcha={}", sessionKey, code);
