@@ -15,6 +15,6 @@ public class ReceivingPieDTO implements Serializable {
     private static final long serialVersionUID = -3643671463667810717L;
 
     private BigDecimal price;
-    private long count;
+    private long proportion;
 
 }

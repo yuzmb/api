@@ -2,6 +2,7 @@ package com.mtdhb.api.service.impl;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -91,6 +92,8 @@ public class ReceivingServiceImpl implements ReceivingService {
     private List<LinkedBlockingQueue<Cookie>> queues;
     @Resource(name = "thresholds")
     private int[] thresholds;
+    @Resource(name = "mins")
+    private BigDecimal[] mins;
 
     @Override
     public ReceivingDTO get(long receivingId, long userId) {
@@ -155,12 +158,27 @@ public class ReceivingServiceImpl implements ReceivingService {
     @Cacheable(cacheNames = "RECEIVING_PIE")
     @Override
     public List<ReceivingPieDTO> listReceivingPie(ThirdPartyApplication application) {
+        int scale = 100000;
         List<ReceivingPieView> receivingPieViews = receivingRepository.findReceivingPieView(application);
+        // 过滤异常数据
+        receivingPieViews = receivingPieViews.stream()
+                .filter(receivingPieView -> receivingPieView.getPrice().compareTo(mins[application.ordinal()]) >= 0)
+                .collect(Collectors.toList());
+        double totalCount = receivingPieViews.stream().mapToDouble(ReceivingPieView::getCount).sum();
+        ReceivingPieView last = receivingPieViews.remove(receivingPieViews.size() - 1);
         List<ReceivingPieDTO> receivingPieDTOs = receivingPieViews.stream().map(receivingPieView -> {
             ReceivingPieDTO receivingPieDTO = new ReceivingPieDTO();
-            BeanUtils.copyProperties(receivingPieView, receivingPieDTO);
+            receivingPieDTO.setPrice(receivingPieView.getPrice());
+            // 四舍五入
+            long proportion = Math.round(receivingPieView.getCount() * scale / totalCount);
+            receivingPieDTO.setProportion(proportion);
             return receivingPieDTO;
         }).collect(Collectors.toList());
+        long other = receivingPieDTOs.stream().mapToLong(ReceivingPieDTO::getProportion).sum();
+        ReceivingPieDTO receivingPieDTO = new ReceivingPieDTO();
+        receivingPieDTO.setPrice(last.getPrice());
+        receivingPieDTO.setProportion(scale - other);
+        receivingPieDTOs.add(receivingPieDTO);
         return receivingPieDTOs;
     }
 

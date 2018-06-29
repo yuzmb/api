@@ -1,6 +1,7 @@
 package com.mtdhb.api;
 
 import java.lang.invoke.MethodHandles;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,6 +72,7 @@ public class Application {
 
     @Bean
     public ThreadPoolExecutor[] asynReceivePools() {
+        // TODO 先用无界队列，崩了再说
         return Stream.of(ThirdPartyApplication.values()).map(application -> {
             int poolSize = application.ordinal() + 1 << 2;
             return new ThreadPoolExecutor(poolSize, poolSize, 1L, TimeUnit.MINUTES, new LinkedBlockingQueue<>(),
@@ -88,6 +90,12 @@ public class Application {
     public int[] thresholds() {
         // 美团拼手气红包最多20个，饿了么10个
         return new int[] { 20, 10 };
+    }
+
+    @Bean
+    public BigDecimal[] mins() {
+        // 美团拼手气红包的手气最佳红包的最小金额3.6，饿了么4.6
+        return new BigDecimal[] { new BigDecimal("3.3"), new BigDecimal("4.6") };
     }
 
     @Resource(name = "asynDispatchPools")
