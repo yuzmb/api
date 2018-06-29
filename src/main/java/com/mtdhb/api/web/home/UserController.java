@@ -171,7 +171,7 @@ public class UserController {
         ThirdPartyApplication application = null;
         ReceivingDTO receivingDTO = null;
         // 某些地方复制出的链接带 &amp; 而不是 &
-+       url = url.replace("&amp;", "&");
+        url = url.replace("&amp;", "&");
         // 很多用户用手机复制链接的时候会带上末尾的 ]
         if (url.endsWith("]")) {
             url = url.substring(0, url.length() - 1);
@@ -190,7 +190,8 @@ public class UserController {
         if (url.startsWith("https://h5.ele.me/hongbao/")) {
             key = getParmeter(spec.getRef(), "sn");
             application = ThirdPartyApplication.ELE;
-        } else if (url.startsWith("https://activity.waimai.meituan.com/") || url.startsWith("http://activity.waimai.meituan.com/")) {
+        } else if (url.startsWith("https://activity.waimai.meituan.com/")
+                || url.startsWith("http://activity.waimai.meituan.com/")) {
             key = getParmeter(spec.getQuery(), "urlKey");
             application = ThirdPartyApplication.MEITUAN;
         }
