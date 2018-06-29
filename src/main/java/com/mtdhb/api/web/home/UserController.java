@@ -210,15 +210,6 @@ public class UserController {
         return Results.success(receivingDTO);
     }
 
-    @Deprecated
-    @RequestMapping(value = "/available")
-    public Result available() {
-        UserDTO userDTO = RequestContextHolder.get();
-        return Results.success(Stream.of(ThirdPartyApplication.values())
-                .collect(Collectors.toMap(application -> application.name().toLowerCase(),
-                        application -> userService.getAvailable(application, userDTO.getId()))));
-    }
-
     @RequestMapping(value = "/number")
     public Result number() {
         UserDTO userDTO = RequestContextHolder.get();

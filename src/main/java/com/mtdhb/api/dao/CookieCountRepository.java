@@ -3,8 +3,6 @@ package com.mtdhb.api.dao;
 import java.sql.Timestamp;
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
@@ -25,8 +23,5 @@ public interface CookieCountRepository extends CrudRepository<CookieCount, Long>
             + " from CookieCount ck where ck.application=?1 and ck.gmtCreate>?2 and ck.cookieId between ?3 and ?4 group by ck.openId")
     List<CookieCountView> findCookieCountView(ThirdPartyApplication application, Timestamp gmtCreate, long lower,
             long upper);
-
-    @Transactional
-    void deleteByGmtCreateLessThan(Timestamp gmtCreate);
 
 }

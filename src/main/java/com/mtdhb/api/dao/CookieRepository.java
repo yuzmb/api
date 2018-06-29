@@ -1,7 +1,6 @@
 package com.mtdhb.api.dao;
 
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,13 +26,9 @@ public interface CookieRepository extends CrudRepository<Cookie, Long> {
 
     Cookie findByIdAndUserId(long id, long userId);
 
-    List<Cookie> findByOpenIdIsNull();
-
-    List<Cookie> findByIdIn(Set<Long> ids);
+    Slice<Cookie> findByApplicationAndIdGreaterThan(ThirdPartyApplication application, long lower, Pageable pageable);
 
     @Query(value = "select c.userId as userId, count(*) as count from Cookie c where c.application=?1 group by c.userId order by count(*) desc, max(c.gmtCreate) asc")
     Page<CookieRankView> findCookieRankViewByApplication(ThirdPartyApplication application, Pageable pageable);
-
-    Slice<Cookie> findByApplicationAndIdGreaterThan(ThirdPartyApplication application, long lower, Pageable pageable);
 
 }
