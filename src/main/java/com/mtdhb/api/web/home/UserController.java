@@ -170,6 +170,8 @@ public class UserController {
         String key = null;
         ThirdPartyApplication application = null;
         ReceivingDTO receivingDTO = null;
+        // 某些地方复制出的链接带 &amp; 而不是 &
++       url = url.replace("&amp;", "&");
         // 很多用户用手机复制链接的时候会带上末尾的 ]
         if (url.endsWith("]")) {
             url = url.substring(0, url.length() - 1);
