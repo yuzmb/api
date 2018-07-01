@@ -44,7 +44,7 @@ public class Application {
     }
 
     @Bean
-    public ThreadPoolExecutor asynSendMailPool() {
+    public ThreadPoolExecutor sendMailPool() {
         // TODO 先用无界队列，崩了再说
         return new ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<>(),
                 new NamedThreadFactory(ThreadPoolName.ASYN_SEND_MAIL_POOL));
@@ -63,7 +63,8 @@ public class Application {
     }
 
     @Bean
-    public ThreadPoolExecutor[] asynDispatchPools() {
+    public ThreadPoolExecutor[] dispatchPools() {
+        // TODO 先用无界队列，崩了再说
         return Stream.of(ThirdPartyApplication.values())
                 .map(application -> new ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<>(),
                         new NamedThreadFactory(ThreadPoolName.ASYN_DISPATCH_POOL + application.name())))
@@ -71,7 +72,7 @@ public class Application {
     }
 
     @Bean
-    public ThreadPoolExecutor[] asynReceivePools() {
+    public ThreadPoolExecutor[] receivePools() {
         // TODO 先用无界队列，崩了再说
         return Stream.of(ThirdPartyApplication.values()).map(application -> {
             int poolSize = application.ordinal() + 1 << 2;
@@ -98,17 +99,17 @@ public class Application {
         return new BigDecimal[] { new BigDecimal("3.3"), new BigDecimal("4.6") };
     }
 
-    @Resource(name = "asynDispatchPools")
-    private ThreadPoolExecutor[] asynDispatchPools;
+    @Resource(name = "dispatchPools")
+    private ThreadPoolExecutor[] dispatchPools;
 
-    @Resource(name = "asynReceivePools")
-    private ThreadPoolExecutor[] asynReceivePools;
+    @Resource(name = "receivePools")
+    private ThreadPoolExecutor[] receivePools;
 
     @PreDestroy
     public void preDestroy() {
         // TODO 待优化
         // 关闭调度线程池
-        Stream.of(asynDispatchPools).forEach(asynDispatchPool -> {
+        Stream.of(dispatchPools).forEach(asynDispatchPool -> {
             List<Runnable> tasks = asynDispatchPool.shutdownNow();
             logger.info("DispatchTasks#size={}", tasks.size());
             try {
@@ -118,7 +119,7 @@ public class Application {
             }
         });
         // 关闭领取线程池
-        Stream.of(asynReceivePools).forEach(asynReceivePool -> {
+        Stream.of(receivePools).forEach(asynReceivePool -> {
             List<Runnable> tasks = asynReceivePool.shutdownNow();
             logger.info("ReceiveTasks#size={}", tasks.size());
             try {

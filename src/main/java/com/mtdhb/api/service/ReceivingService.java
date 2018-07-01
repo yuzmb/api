@@ -28,11 +28,7 @@ public interface ReceivingService {
 
     ReceivingDTO save(String key, String url, String phone, ThirdPartyApplication application, long userId);
 
-    void asynDispatch(Receiving receiving, long available);
-
     void dispatch(Receiving receiving, long available);
-
-    void asynReceive(Receiving receiving, List<Cookie> cookies, long available);
 
     void receive(Receiving receiving, List<Cookie> cookies, long available);
 

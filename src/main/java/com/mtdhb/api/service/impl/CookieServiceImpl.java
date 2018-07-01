@@ -61,25 +61,25 @@ public class CookieServiceImpl implements CookieService {
     public static final int CHUNK_SIZE = 1024;
 
     @Autowired
-    private UserService userService;
-    @Autowired
     private NodejsService nodejsService;
+    @Autowired
+    private UserService userService;
     @Autowired
     private CookieRepository cookieRepository;
     @Autowired
     private CookieCountRepository cookieCountRepository;
     @Autowired
-    private ReceivingRepository receivingRepository;
-    @Autowired
     private CookieMarkRepository cookieMarkRepository;
-    @Resource(name = "usage")
-    private Map<String, Long> usage;
-    @Resource(name = "queues")
-    private List<LinkedBlockingQueue<Cookie>> queues;
+    @Autowired
+    private ReceivingRepository receivingRepository;
     @Resource(name = "endpoints")
     private AtomicLong[] endpoints;
+    @Resource(name = "queues")
+    private List<LinkedBlockingQueue<Cookie>> queues;
     @Resource(name = "thresholds")
     private int[] thresholds;
+    @Resource(name = "usage")
+    private Map<String, Long> usage;
 
     @Override
     public List<CookieDTO> list(long userId) {

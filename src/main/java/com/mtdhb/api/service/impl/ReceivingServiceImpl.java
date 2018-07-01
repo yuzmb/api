@@ -14,7 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -53,12 +52,11 @@ import com.mtdhb.api.entity.view.ReceivingCarouselView;
 import com.mtdhb.api.entity.view.ReceivingPieView;
 import com.mtdhb.api.entity.view.ReceivingTrendView;
 import com.mtdhb.api.exception.BusinessException;
+import com.mtdhb.api.service.AsyncService;
 import com.mtdhb.api.service.CookieService;
 import com.mtdhb.api.service.NodejsService;
 import com.mtdhb.api.service.ReceivingService;
 import com.mtdhb.api.service.UserService;
-import com.mtdhb.api.task.DispatchTask;
-import com.mtdhb.api.task.ReceiveTask;
 import com.mtdhb.api.util.Entities;
 
 /**
@@ -71,6 +69,8 @@ public class ReceivingServiceImpl implements ReceivingService {
     private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
+    private AsyncService asyncService;
+    @Autowired
     private CookieService cookieService;
     @Autowired
     private NodejsService nodejsService;
@@ -82,18 +82,14 @@ public class ReceivingServiceImpl implements ReceivingService {
     private CookieMarkRepository cookieMarkRepository;
     @Autowired
     private ReceivingRepository receivingRepository;
-    @Resource(name = "asynDispatchPools")
-    private ThreadPoolExecutor[] asynDispatchPools;
-    @Resource(name = "asynReceivePools")
-    private ThreadPoolExecutor[] asynReceivePools;
-    @Resource(name = "usage")
-    private Map<String, Long> usage;
+    @Resource(name = "mins")
+    private BigDecimal[] mins;
     @Resource(name = "queues")
     private List<LinkedBlockingQueue<Cookie>> queues;
     @Resource(name = "thresholds")
     private int[] thresholds;
-    @Resource(name = "mins")
-    private BigDecimal[] mins;
+    @Resource(name = "usage")
+    private Map<String, Long> usage;
 
     @Override
     public ReceivingDTO get(long receivingId, long userId) {
@@ -211,18 +207,11 @@ public class ReceivingServiceImpl implements ReceivingService {
         receiving.setUserId(userId);
         receiving.setGmtCreate(Timestamp.from(Instant.now()));
         receivingRepository.save(receiving);
-        asynDispatch(receiving, available);
+        asyncService.dispatch(receiving, available);
         ReceivingDTO receivingDTO = new ReceivingDTO();
         BeanUtils.copyProperties(receiving, receivingDTO);
         receivingDTO.setPhone(Entities.encodePhone(receivingDTO.getPhone()));
         return receivingDTO;
-    }
-
-    @Override
-    public void asynDispatch(Receiving receiving, long available) {
-        ThirdPartyApplication application = receiving.getApplication();
-        DispatchTask dispatchTask = new DispatchTask(this, receiving, available);
-        asynDispatchPools[application.ordinal()].execute(dispatchTask);
     }
 
     @Override
@@ -250,15 +239,7 @@ public class ReceivingServiceImpl implements ReceivingService {
             }
             cookies.add(cookie);
         }
-        asynReceive(receiving, cookies, available);
-
-    }
-
-    @Override
-    public void asynReceive(Receiving receiving, List<Cookie> cookies, long available) {
-        ThirdPartyApplication application = receiving.getApplication();
-        ReceiveTask receiveTask = new ReceiveTask(this, receiving, cookies, available);
-        asynReceivePools[application.ordinal()].execute(receiveTask);
+        asyncService.receive(receiving, cookies, available);
     }
 
     @Override
@@ -331,7 +312,6 @@ public class ReceivingServiceImpl implements ReceivingService {
                     queue.offer(cookie);
                 }
             });
-
             // TODO 可更优化为 mysql native 批量插入
             if (cookieCounts.size() > 0) {
                 cookieCountRepository.save(cookieCounts);

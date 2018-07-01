@@ -15,8 +15,8 @@ import com.mtdhb.api.constant.ReceivingStatus;
 import com.mtdhb.api.constant.ThirdPartyApplication;
 import com.mtdhb.api.dao.ReceivingRepository;
 import com.mtdhb.api.entity.Receiving;
+import com.mtdhb.api.service.AsyncService;
 import com.mtdhb.api.service.CookieService;
-import com.mtdhb.api.service.ReceivingService;
 import com.mtdhb.api.service.UserService;
 
 /**
@@ -29,11 +29,11 @@ public class InitializationDataListener implements ApplicationListener<ContextRe
     private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
-    private UserService userService;
-    @Autowired
-    private ReceivingService receivingService;
+    private AsyncService asyncService;
     @Autowired
     private CookieService cookieService;
+    @Autowired
+    private UserService userService;
     @Autowired
     private ReceivingRepository receivingRepository;
 
@@ -49,7 +49,7 @@ public class InitializationDataListener implements ApplicationListener<ContextRe
             logger.info("receivings#size={}", receivings.size());
             receivings.stream().forEach(receiving -> {
                 long available = userService.getAvailable(receiving.getApplication(), receiving.getUserId());
-                receivingService.asynDispatch(receiving, available);
+                asyncService.dispatch(receiving, available);
             });
         }
     }

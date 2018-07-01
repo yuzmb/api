@@ -7,9 +7,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.concurrent.ThreadPoolExecutor;
-
-import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +31,8 @@ import com.mtdhb.api.dto.UserDTO;
 import com.mtdhb.api.entity.User;
 import com.mtdhb.api.entity.Verification;
 import com.mtdhb.api.exception.BusinessException;
+import com.mtdhb.api.service.AsyncService;
 import com.mtdhb.api.service.UserService;
-import com.mtdhb.api.task.SendMailTask;
 import com.mtdhb.api.util.Entities;
 import com.mtdhb.api.util.SecureRandoms;
 
@@ -49,17 +46,17 @@ public class UserServiceImpl implements UserService {
     private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private VerificationRepository verificationRepository;
+    private AsyncService asyncService;
     @Autowired
     private CookieRepository cookieRepository;
     @Autowired
     private CookieCountRepository cookieCountRepository;
     @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private VerificationRepository verificationRepository;
+    @Autowired
     private MailConfiguration mailConfiguration;
-    @Resource(name = "asynSendMailPool")
-    private ThreadPoolExecutor asynSendMailPool;
 
     @Override
     public UserDTO loginByMail(String mail, String password) {
@@ -193,7 +190,7 @@ public class UserServiceImpl implements UserService {
         verification.setUsed(false);
         verification.setGmtCreate(Timestamp.from(Instant.now()));
         verificationRepository.save(verification);
-        asynSendMailPool.execute(new SendMailTask(mail, subject, String.format(template, code, code)));
+        asyncService.sendMail(mail, subject, String.format(template, code, code));
     }
 
 }
