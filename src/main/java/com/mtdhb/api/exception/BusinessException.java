@@ -2,7 +2,7 @@ package com.mtdhb.api.exception;
 
 import org.slf4j.helpers.MessageFormatter;
 
-import com.mtdhb.api.constant.ErrorCode;
+import com.mtdhb.api.constant.e.ErrorCode;
 
 /**
  * 业务异常

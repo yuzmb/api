@@ -1,21 +1,25 @@
-package com.mtdhb.api.constant;
+package com.mtdhb.api.constant.e;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * @author i@huangdenghe.com
- * @date 2017/12/12
+ * @date 2018/03/07
  */
-public enum VerificationType {
+public enum HttpService {
 
     /**
-     * 邮箱
+     * 微信
      */
-    MAIL,
+    WEIXIN,
     /**
-     * 手机
+     * QQ
      */
-    PHONE;
+    QQ,
+    /**
+     * 微信小程序
+     */
+    MINI_PROGRAM;
 
     @JsonValue
     public int getJsonValue() {

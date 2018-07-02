@@ -1,4 +1,4 @@
-package com.mtdhb.api.constant;
+package com.mtdhb.api.constant.e;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
@@ -6,20 +6,16 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * @author i@huangdenghe.com
  * @date 2018/03/07
  */
-public enum HttpService {
+public enum ThirdPartyApplication {
 
     /**
-     * 微信
+     * 美团
      */
-    WEIXIN,
+    MEITUAN,
     /**
-     * QQ
+     * 饿了么
      */
-    QQ,
-    /**
-     * 微信小程序
-     */
-    MINI_PROGRAM;
+    ELE;
 
     @JsonValue
     public int getJsonValue() {

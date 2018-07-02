@@ -18,10 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mtdhb.api.configuration.MailConfiguration;
-import com.mtdhb.api.constant.ErrorCode;
-import com.mtdhb.api.constant.Purpose;
-import com.mtdhb.api.constant.ThirdPartyApplication;
-import com.mtdhb.api.constant.VerificationType;
+import com.mtdhb.api.constant.e.ErrorCode;
+import com.mtdhb.api.constant.e.Purpose;
+import com.mtdhb.api.constant.e.ThirdPartyApplication;
+import com.mtdhb.api.constant.e.VerificationType;
 import com.mtdhb.api.dao.CookieCountRepository;
 import com.mtdhb.api.dao.CookieRepository;
 import com.mtdhb.api.dao.UserRepository;

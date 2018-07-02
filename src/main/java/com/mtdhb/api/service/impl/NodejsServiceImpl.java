@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.mtdhb.api.configuration.NodejsConfiguration;
-import com.mtdhb.api.constant.ThirdPartyApplication;
+import com.mtdhb.api.constant.e.ThirdPartyApplication;
 import com.mtdhb.api.dto.nodejs.CookieCheckDTO;
 import com.mtdhb.api.dto.nodejs.RedPacketDTO;
 import com.mtdhb.api.dto.nodejs.ResultDTO;

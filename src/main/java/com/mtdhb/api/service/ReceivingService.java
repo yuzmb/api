@@ -2,7 +2,7 @@ package com.mtdhb.api.service;
 
 import java.util.List;
 
-import com.mtdhb.api.constant.ThirdPartyApplication;
+import com.mtdhb.api.constant.e.ThirdPartyApplication;
 import com.mtdhb.api.dto.ReceivingCarouselDTO;
 import com.mtdhb.api.dto.ReceivingDTO;
 import com.mtdhb.api.dto.ReceivingPieDTO;

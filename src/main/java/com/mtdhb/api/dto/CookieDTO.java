@@ -2,7 +2,7 @@ package com.mtdhb.api.dto;
 
 import java.sql.Timestamp;
 
-import com.mtdhb.api.constant.ThirdPartyApplication;
+import com.mtdhb.api.constant.e.ThirdPartyApplication;
 
 import lombok.Data;
 

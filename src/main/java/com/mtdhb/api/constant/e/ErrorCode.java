@@ -1,4 +1,4 @@
-package com.mtdhb.api.constant;
+package com.mtdhb.api.constant.e;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -7,8 +7,8 @@ import java.sql.Timestamp;
 
 import org.springframework.data.repository.CrudRepository;
 
-import com.mtdhb.api.constant.Purpose;
-import com.mtdhb.api.constant.VerificationType;
+import com.mtdhb.api.constant.e.Purpose;
+import com.mtdhb.api.constant.e.VerificationType;
 import com.mtdhb.api.entity.Verification;
 
 /**

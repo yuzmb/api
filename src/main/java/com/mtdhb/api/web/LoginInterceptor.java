@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.mtdhb.api.constant.CustomHttpHeaders;
-import com.mtdhb.api.constant.ErrorCode;
+import com.mtdhb.api.constant.e.ErrorCode;
 import com.mtdhb.api.dto.UserDTO;
 import com.mtdhb.api.exception.BusinessException;
 import com.mtdhb.api.service.UserService;

@@ -8,7 +8,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
-import com.mtdhb.api.constant.ThirdPartyApplication;
+import com.mtdhb.api.constant.e.ThirdPartyApplication;
 import com.mtdhb.api.entity.Cookie;
 import com.mtdhb.api.entity.view.CookieRankView;
 

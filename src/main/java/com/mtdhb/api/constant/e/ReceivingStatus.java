@@ -1,21 +1,14 @@
-package com.mtdhb.api.constant;
+package com.mtdhb.api.constant.e;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * @author i@huangdenghe.com
- * @date 2018/03/07
+ * @date 2018/05/31
  */
-public enum ThirdPartyApplication {
+public enum ReceivingStatus {
 
-    /**
-     * 美团
-     */
-    MEITUAN,
-    /**
-     * 饿了么
-     */
-    ELE;
+    ING, SUCCESS, FAILURE;
 
     @JsonValue
     public int getJsonValue() {

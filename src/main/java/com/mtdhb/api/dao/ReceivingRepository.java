@@ -8,8 +8,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
-import com.mtdhb.api.constant.ReceivingStatus;
-import com.mtdhb.api.constant.ThirdPartyApplication;
+import com.mtdhb.api.constant.e.ReceivingStatus;
+import com.mtdhb.api.constant.e.ThirdPartyApplication;
 import com.mtdhb.api.entity.Receiving;
 import com.mtdhb.api.entity.view.ReceivingCarouselView;
 import com.mtdhb.api.entity.view.ReceivingPieView;

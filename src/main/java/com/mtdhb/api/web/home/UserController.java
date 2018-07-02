@@ -24,9 +24,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.mtdhb.api.constant.ErrorCode;
 import com.mtdhb.api.constant.SessionKeys;
-import com.mtdhb.api.constant.ThirdPartyApplication;
+import com.mtdhb.api.constant.e.ErrorCode;
+import com.mtdhb.api.constant.e.ThirdPartyApplication;
 import com.mtdhb.api.dto.AccountDTO;
 import com.mtdhb.api.dto.MailDTO;
 import com.mtdhb.api.dto.ReceivingDTO;

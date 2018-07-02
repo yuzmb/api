@@ -8,8 +8,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import com.mtdhb.api.constant.CookieStatus;
-import com.mtdhb.api.constant.ThirdPartyApplication;
+import com.mtdhb.api.constant.e.CookieStatus;
+import com.mtdhb.api.constant.e.ThirdPartyApplication;
 
 import lombok.Data;
 
@@ -20,16 +20,10 @@ public class CookieMark {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    /**
-     * TODO 冗余字段
-     */
     @Enumerated
     private ThirdPartyApplication application;
     @Enumerated
     private CookieStatus status;
-    /**
-     * TODO 冗余字段
-     */
     private Long userId;
     private Long cookieId;
     private Timestamp gmtCreate;

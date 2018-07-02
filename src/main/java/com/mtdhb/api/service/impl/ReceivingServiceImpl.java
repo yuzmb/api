@@ -29,10 +29,10 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.mtdhb.api.constant.CookieStatus;
-import com.mtdhb.api.constant.ErrorCode;
-import com.mtdhb.api.constant.ReceivingStatus;
-import com.mtdhb.api.constant.ThirdPartyApplication;
+import com.mtdhb.api.constant.e.CookieStatus;
+import com.mtdhb.api.constant.e.ErrorCode;
+import com.mtdhb.api.constant.e.ReceivingStatus;
+import com.mtdhb.api.constant.e.ThirdPartyApplication;
 import com.mtdhb.api.dao.CookieCountRepository;
 import com.mtdhb.api.dao.CookieMarkRepository;
 import com.mtdhb.api.dao.ReceivingRepository;

@@ -23,8 +23,8 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.mtdhb.api.constant.ThirdPartyApplication;
-import com.mtdhb.api.constant.ThreadPoolName;
+import com.mtdhb.api.constant.ThreadPoolNames;
+import com.mtdhb.api.constant.e.ThirdPartyApplication;
 import com.mtdhb.api.entity.Cookie;
 import com.mtdhb.api.factory.NamedThreadFactory;
 
@@ -47,7 +47,7 @@ public class Application {
     public ThreadPoolExecutor sendMailPool() {
         // TODO 先用无界队列，崩了再说
         return new ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<>(),
-                new NamedThreadFactory(ThreadPoolName.ASYN_SEND_MAIL_POOL));
+                new NamedThreadFactory(ThreadPoolNames.SEND_MAIL_POOL));
     }
 
     @Bean
@@ -67,7 +67,7 @@ public class Application {
         // TODO 先用无界队列，崩了再说
         return Stream.of(ThirdPartyApplication.values())
                 .map(application -> new ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<>(),
-                        new NamedThreadFactory(ThreadPoolName.ASYN_DISPATCH_POOL + application.name())))
+                        new NamedThreadFactory(ThreadPoolNames.DISPATCH_POOL + application.name())))
                 .toArray(ThreadPoolExecutor[]::new);
     }
 
@@ -77,7 +77,7 @@ public class Application {
         return Stream.of(ThirdPartyApplication.values()).map(application -> {
             int poolSize = application.ordinal() + 1 << 2;
             return new ThreadPoolExecutor(poolSize, poolSize, 1L, TimeUnit.MINUTES, new LinkedBlockingQueue<>(),
-                    new NamedThreadFactory(ThreadPoolName.ASYN_RECEIVE_POOL + application.name()));
+                    new NamedThreadFactory(ThreadPoolNames.RECEIVE_POOL + application.name()));
         }).toArray(ThreadPoolExecutor[]::new);
     }
 

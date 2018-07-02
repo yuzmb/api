@@ -12,8 +12,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import com.mtdhb.api.constant.Purpose;
-import com.mtdhb.api.constant.VerificationType;
+import com.mtdhb.api.constant.e.Purpose;
+import com.mtdhb.api.constant.e.VerificationType;
 
 import lombok.Data;
 

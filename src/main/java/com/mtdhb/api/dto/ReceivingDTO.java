@@ -3,8 +3,8 @@ package com.mtdhb.api.dto;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
-import com.mtdhb.api.constant.ReceivingStatus;
-import com.mtdhb.api.constant.ThirdPartyApplication;
+import com.mtdhb.api.constant.e.ReceivingStatus;
+import com.mtdhb.api.constant.e.ThirdPartyApplication;
 
 import lombok.Data;
 

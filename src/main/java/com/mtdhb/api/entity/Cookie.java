@@ -8,8 +8,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import com.mtdhb.api.constant.HttpService;
-import com.mtdhb.api.constant.ThirdPartyApplication;
+import com.mtdhb.api.constant.e.HttpService;
+import com.mtdhb.api.constant.e.ThirdPartyApplication;
 
 import lombok.Data;
 

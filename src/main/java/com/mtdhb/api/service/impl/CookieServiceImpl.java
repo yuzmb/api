@@ -27,10 +27,10 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.mtdhb.api.constant.ErrorCode;
-import com.mtdhb.api.constant.HttpService;
-import com.mtdhb.api.constant.ReceivingStatus;
-import com.mtdhb.api.constant.ThirdPartyApplication;
+import com.mtdhb.api.constant.e.ErrorCode;
+import com.mtdhb.api.constant.e.HttpService;
+import com.mtdhb.api.constant.e.ReceivingStatus;
+import com.mtdhb.api.constant.e.ThirdPartyApplication;
 import com.mtdhb.api.dao.CookieCountRepository;
 import com.mtdhb.api.dao.CookieMarkRepository;
 import com.mtdhb.api.dao.CookieRepository;

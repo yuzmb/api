@@ -1,4 +1,4 @@
-package com.mtdhb.api.constant;
+package com.mtdhb.api.constant.e;
 
 /**
  * @author i@huangdenghe.com

@@ -11,8 +11,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import com.mtdhb.api.constant.ReceivingStatus;
-import com.mtdhb.api.constant.ThirdPartyApplication;
+import com.mtdhb.api.constant.e.ReceivingStatus;
+import com.mtdhb.api.constant.e.ThirdPartyApplication;
 import com.mtdhb.api.dao.ReceivingRepository;
 import com.mtdhb.api.entity.Receiving;
 import com.mtdhb.api.service.AsyncService;

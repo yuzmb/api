@@ -3,7 +3,7 @@ package com.mtdhb.api.service;
 import java.io.IOException;
 import java.util.List;
 
-import com.mtdhb.api.constant.ThirdPartyApplication;
+import com.mtdhb.api.constant.e.ThirdPartyApplication;
 import com.mtdhb.api.dto.CookieDTO;
 import com.mtdhb.api.dto.CookieRankDTO;
 

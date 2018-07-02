@@ -1,14 +1,14 @@
-package com.mtdhb.api.constant;
+package com.mtdhb.api.constant.e;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * @author i@huangdenghe.com
- * @date 2018/05/31
+ * @date 2018/03/14
  */
-public enum ReceivingStatus {
+public enum CookieStatus {
 
-    ING, SUCCESS, FAILURE;
+    SUCCESS, USED, INVALID, LIMIT;
 
     @JsonValue
     public int getJsonValue() {
