@@ -33,7 +33,8 @@ public enum ErrorCode {
     SYSTEM_MAINTENANCE(10017, "领取失败，23:50至00:10为系统维护时间。维护原因：致敬12306"),
     MAIL_NOT_EXIST(10018, "邮箱不存在！"),
     USER_LOCKED(10019, "账号已被封禁！"),
-    COOKIE_MEITUAN_DELETE_FAILURE(10020, "由于目前可用的美团 cookie 均以绝版，为了防止用户误删，暂时禁止删除。如确系要删除，请联系管理员！");
+    COOKIE_MEITUAN_DELETE_FAILURE(10020, "由于目前可用的美团 cookie 均以绝版，为了防止用户误删，暂时禁止删除。如确系要删除，请联系管理员！"),
+    MAIL_ON_BLACKLIST(10021, "禁止使用临时邮箱注册！");
 
     private int code;
     private String message;

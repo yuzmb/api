@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,6 +108,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void sendRegisterMail(String mail) {
+        String lowerCase = mail.toLowerCase();
+        List<String> blacklist = mailConfiguration.getBlacklist();
+        if (blacklist != null && blacklist.stream().anyMatch(domain -> lowerCase.endsWith(domain))) {
+            throw new BusinessException(ErrorCode.MAIL_ON_BLACKLIST, "mail={}", mail);
+        }
         User user = userRepository.findByMail(mail);
         if (user != null) {
             throw new BusinessException(ErrorCode.MAIL_EXIST, "mail={}, user{}", mail, user);

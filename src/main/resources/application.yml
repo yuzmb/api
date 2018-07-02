@@ -32,3 +32,26 @@ com:
                 register-mail-effective-time: 30
                 reset-password-mail-subject: 一键领取手气最佳红包-重置密码
                 reset-password-mail-effective-time: 30
+                blacklist:
+                    # http://www.bccto.me/
+                    - bccto.me
+                    - jnpayy.com
+                    - 11163.com
+                    - chaichuang.com
+                    - a7996.com
+                    - dawin.com
+                    - 4059.com
+                    - 3202.com
+                    - 4057.com
+                    - ytpayy.com
+                    - juyouxi.com
+                    - meihuajun76.com
+                    - cuirushi.org
+                    - zymuying.com
+                    - zhaoyuanedu.cn
+                    - dhy.cc
+                    - cr219.com
+                    - mdu.edu.rs
+                    - mail.jpgames.net
+                    - dongqing365.com
+                    - dahongying.net

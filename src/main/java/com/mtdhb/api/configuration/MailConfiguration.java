@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -61,6 +62,10 @@ public class MailConfiguration {
      * 重置密码邮件有效时间
      */
     private int resetPasswordMailEffectiveTime;
+    /**
+     * 黑名单
+     */
+    private List<String> blacklist;
 
     @PostConstruct
     public void init() {
