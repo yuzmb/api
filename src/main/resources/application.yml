@@ -9,16 +9,16 @@ spring:
     jpa:
         show-sql: true
 
-endpoints:
-    shutdown:
-        sensitive: false
-        enabled: true
-
 management:
     address: 127.0.0.1
+    context-path: /monitor
     port: 9000
     security:
         enabled: false
+
+endpoints:
+    shutdown:
+        enabled: true
 
 com:
     mtdhb:

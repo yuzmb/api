@@ -74,7 +74,7 @@ nohup java -jar api-1.0.0.jar > console.log 2>&1 &
 ### Shutdown
 
 ```
-curl -X POST http://127.0.0.1:9000/shutdown
+curl -X POST http://127.0.0.1:9000/monitor/shutdown
 ```
 
 ## Nginx
