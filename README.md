@@ -20,7 +20,7 @@ Nginx 1.12.2
 ```
 CREATE DATABASE api;
 USE api;
-\. 绝对路径src/main/resources/table.sql
+\. 绝对路径ddl.sql
 ```
 
 ## Redis
