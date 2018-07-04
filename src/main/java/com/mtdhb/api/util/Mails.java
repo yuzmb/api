@@ -87,19 +87,14 @@ public class Mails {
         // 此处要用 Session#getInstance，Session#getDefaultInstance 为单例
         Session session = Session.getInstance(properties);
         MimeMessage message = new MimeMessage(session);
-        // 设置发件人
         message.setFrom(new InternetAddress(user, MimeUtility.encodeText(personal)));
-        // 添加收件人
         addRecipients(message, Message.RecipientType.TO, to);
-        // 添加抄送
         if (cc != null) {
             addRecipients(message, Message.RecipientType.CC, cc);
         }
-        // 添加密送
         if (bcc != null) {
             addRecipients(message, Message.RecipientType.BCC, bcc);
         }
-        // 设置主题
         message.setSubject(subject);
         // 最外层部分
         MimeMultipart wrapPart = new MimeMultipart();

@@ -35,7 +35,7 @@ public class Captcha {
         try (InputStream in = Captcha.class.getClassLoader().getResourceAsStream("arial.ttf")) {
             ARIAL = Font.createFont(Font.TRUETYPE_FONT, in);
         } catch (FontFormatException | IOException e) {
-            logger.info(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -101,12 +101,9 @@ public class Captcha {
 
     private void init() {
         Graphics g = image.getGraphics();
-        // 获得画笔默认颜色
         Color defaultColor = g.getColor();
-        // 获得画笔默认的字体
         Font defaultFont = g.getFont();
         logger.debug("defaultFont={}", defaultFont);
-        // 绘制白色背景
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, image.getWidth(), image.getHeight());
         Map<AttributedCharacterIterator.Attribute, Object> attributes = new HashMap<AttributedCharacterIterator.Attribute, Object>();
@@ -135,7 +132,6 @@ public class Captcha {
             int y = margin + (height - fm.getHeight() >> 1) + fm.getLeading() + fm.getAscent();
             g.drawString(String.valueOf(c), x, y);
         }
-        // 恢复默认
         g.setColor(defaultColor);
         g.setFont(defaultFont);
     }

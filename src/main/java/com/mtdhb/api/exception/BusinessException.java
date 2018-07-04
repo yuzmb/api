@@ -9,6 +9,7 @@ import com.mtdhb.api.constant.e.ErrorCode;
  * 
  * @author i@huangdenghe.com
  * @date 2017/12/11
+ * @see ch.qos.logback.classic.spi.LoggingEvent#getFormattedMessage()
  */
 public class BusinessException extends RuntimeException {
 

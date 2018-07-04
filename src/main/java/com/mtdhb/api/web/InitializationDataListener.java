@@ -42,7 +42,6 @@ public class InitializationDataListener implements ApplicationListener<ContextRe
         // root of context hierarchy
         if (event.getApplicationContext().getParent() == null) {
             logger.info("Initializing custom");
-            // 加载 cookie
             Stream.of(ThirdPartyApplication.values()).forEach(application -> cookieService.load(application));
             // 执行未完成的领取任务
             List<Receiving> receivings = receivingRepository.findByStatus(ReceivingStatus.ING);

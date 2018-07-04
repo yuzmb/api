@@ -32,14 +32,12 @@ import com.mtdhb.api.constant.e.HttpService;
 import com.mtdhb.api.constant.e.ReceivingStatus;
 import com.mtdhb.api.constant.e.ThirdPartyApplication;
 import com.mtdhb.api.dao.CookieCountRepository;
-import com.mtdhb.api.dao.CookieMarkRepository;
 import com.mtdhb.api.dao.CookieRepository;
 import com.mtdhb.api.dao.ReceivingRepository;
 import com.mtdhb.api.dto.CookieDTO;
 import com.mtdhb.api.dto.CookieRankDTO;
 import com.mtdhb.api.dto.nodejs.CookieCheckDTO;
 import com.mtdhb.api.entity.Cookie;
-import com.mtdhb.api.entity.CookieMark;
 import com.mtdhb.api.entity.Receiving;
 import com.mtdhb.api.entity.view.CookieCountView;
 import com.mtdhb.api.entity.view.CookieRankView;
@@ -68,8 +66,6 @@ public class CookieServiceImpl implements CookieService {
     private CookieRepository cookieRepository;
     @Autowired
     private CookieCountRepository cookieCountRepository;
-    @Autowired
-    private CookieMarkRepository cookieMarkRepository;
     @Autowired
     private ReceivingRepository receivingRepository;
     @Resource(name = "endpoints")
@@ -156,7 +152,7 @@ public class CookieServiceImpl implements CookieService {
 
     @Override
     public CookieDTO save(String cookieValue, ThirdPartyApplication application, long userId) throws IOException {
-        CookieCheckDTO cookieCheckDTO = nodejsService.check(cookieValue, application);
+        CookieCheckDTO cookieCheckDTO = nodejsService.checkCookie(cookieValue, application);
         String openId = cookieCheckDTO.getOpenid();
         Cookie cookie = cookieRepository.findByOpenId(openId);
         if (cookie != null) {
@@ -204,8 +200,6 @@ public class CookieServiceImpl implements CookieService {
                     "cookieId={}, application={}, userId={}, available={}", cookieId, application, userId, available);
         }
         cookieRepository.delete(cookie);
-        List<CookieMark> cookieMarks = cookieMarkRepository.findByCookieIdAndUserId(cookieId, userId);
-        cookieMarks.stream().forEach(cookieMark -> cookieMarkRepository.delete(cookieMark));
     }
 
 }

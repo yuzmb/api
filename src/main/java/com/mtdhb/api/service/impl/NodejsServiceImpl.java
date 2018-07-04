@@ -30,7 +30,7 @@ public class NodejsServiceImpl implements NodejsService {
     private NodejsConfiguration nodejsConfiguration;
 
     @Override
-    public CookieCheckDTO check(String cookieValue, ThirdPartyApplication application) throws IOException {
+    public CookieCheckDTO checkCookie(String cookieValue, ThirdPartyApplication application) throws IOException {
         String spec = nodejsConfiguration.getUrl() + nodejsConfiguration.getCheckCookie();
         Map<String, Object> arg = new HashMap<>();
         arg.put("cookie", cookieValue);
