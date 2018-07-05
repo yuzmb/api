@@ -43,21 +43,24 @@ spring:
         password: 你的数据库密码
 ```
 
-#### EMAIL（此部分代码有待优化）
+#### EMAIL
 
-由于免费企业邮箱有发送数量和频率的限制，不足以支撑我们网站的发件量，而我们又买不起收费的，曾导致大量注册我们网站的用户收不到注册邮件。所以我们才用通过配置多个免费企业邮箱的方式解决
-
-配置多个企业邮箱需更改代码
-[src/main/java/com/mtdhb/api/util/Mails.java](src/main/java/com/mtdhb/api/util/Mails.java)
+[src/main/resources/mail0.properties](src/main/resources/mail0.properties)
 
 ```
-/**
- * 企业邮箱配置的数量
- */
-private static final int SIZE = 4;
+mail.transport.protocol=smtp
+mail.smtp.host=你的邮箱的 SMTP 服务器地址
+mail.smtp.socketFactory.class=javax.net.ssl.SSLSocketFactory
+mail.smtp.socketFactory.port=465
+mail.smtp.auth=true
+
+# Custom
+com.mtdhb.mail.personal=\u6BCF\u5929\u5927\u7EA2\u5305
+com.mtdhb.mail.user=你的邮箱账号
+com.mtdhb.mail.password=你的邮箱密码
 ```
 
-该数值需要与 [src/main/resources/](src/main/resources/) 目录下的 `mail*.properties` 文件数量相对应并更改配置文件内容
+支持多邮箱配置，你只需在 [src/main/resources/](src/main/resources/) 目录下新增 `mail*.properties` 并保证文件名最后的索引数字是连续递增的即可。
 
 ### Package
 

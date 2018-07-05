@@ -5,7 +5,7 @@ import java.lang.invoke.MethodHandles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mtdhb.api.util.Mails;
+import com.mtdhb.api.util.Mail;
 
 /**
  * @author i@huangdenghe.com
@@ -28,12 +28,9 @@ public class SendMailTask implements Runnable {
 
     @Override
     public void run() {
-        logger.info("SendMailTask: to={}, subject={}, content={}", to, subject, content);
-        try {
-            Mails.send(to, subject, content);
-        } catch (Exception e) {
-            logger.error("SendMailTask: to={}, subject={}, content={}", to, subject, content, e);
-        }
+        logger.info("SendMailTask#run starting...");
+        Mail.getInstance().send(to, subject, content);
+        logger.info("SendMailTask#run end");
     }
 
 }
