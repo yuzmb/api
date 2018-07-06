@@ -7,7 +7,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -139,8 +138,7 @@ public class ReceivingServiceImpl implements ReceivingService {
     @Cacheable(cacheNames = "RECEIVING_TREND")
     @Override
     public List<ReceivingTrendDTO> listReceivingTrend(ThirdPartyApplication application) {
-        Timestamp thisWeek = Timestamp
-                .valueOf(LocalDateTime.of(LocalDate.now(), LocalTime.ofSecondOfDay(0)).minusDays(6));
+        Timestamp thisWeek = Timestamp.valueOf(LocalDate.now().atStartOfDay().minusDays(6));
         List<ReceivingTrendView> receivingTrendViews = receivingRepository.findReceivingTrendView(application,
                 thisWeek);
         List<ReceivingTrendDTO> receivingTrendDTOs = receivingTrendViews.stream().map(receivingTrendView -> {
@@ -153,13 +151,16 @@ public class ReceivingServiceImpl implements ReceivingService {
 
     @Cacheable(cacheNames = "RECEIVING_PIE")
     @Override
-    public List<ReceivingPieDTO> listReceivingPie(ThirdPartyApplication application) {
+    public List<ReceivingPieDTO> listReceivingPie(ThirdPartyApplication application, Timestamp gmtCreate) {
         int scale = 100000;
-        List<ReceivingPieView> receivingPieViews = receivingRepository.findReceivingPieView(application);
+        List<ReceivingPieView> receivingPieViews = receivingRepository.findReceivingPieView(application, gmtCreate);
         // 过滤异常数据
         receivingPieViews = receivingPieViews.stream()
                 .filter(receivingPieView -> receivingPieView.getPrice().compareTo(mins[application.ordinal()]) >= 0)
                 .collect(Collectors.toList());
+        if (receivingPieViews.size() == 0) {
+            return new ArrayList<>();
+        }
         double totalCount = receivingPieViews.stream().mapToDouble(ReceivingPieView::getCount).sum();
         ReceivingPieView last = receivingPieViews.remove(receivingPieViews.size() - 1);
         List<ReceivingPieDTO> receivingPieDTOs = receivingPieViews.stream().map(receivingPieView -> {
@@ -226,7 +227,7 @@ public class ReceivingServiceImpl implements ReceivingService {
             size = queue.size();
         }
         if (size < 1) {
-            saveFailedReceiving(receiving, ErrorCode.COOKIE_INSUFFICIENT.getMessage());
+            saveFailedReceiving(receiving, ErrorCode.COOKIE_INSUFFICIENT.getMessage(), Timestamp.from(Instant.now()));
             return;
         }
         // TODO 配置
@@ -244,7 +245,7 @@ public class ReceivingServiceImpl implements ReceivingService {
 
     @Override
     public void receive(Receiving receiving, List<Cookie> cookies, long available) {
-        logger.info("receiving={}", receiving);
+        Timestamp timestamp = Timestamp.from(Instant.now());
         long userId = receiving.getUserId();
         String url = receiving.getUrl();
         String phone = receiving.getPhone();
@@ -256,7 +257,7 @@ public class ReceivingServiceImpl implements ReceivingService {
             if (redPacketDTO == null) {
                 // TODO 现在暂时不限制领取，异常情况 cookie 直接放回队列
                 cookies.stream().forEach(cookie -> queue.offer(cookie));
-                saveFailedReceiving(receiving, resultDTO.getMessage());
+                saveFailedReceiving(receiving, resultDTO.getMessage(), timestamp);
                 return;
             }
             // Cookie 的使用统计
@@ -288,7 +289,7 @@ public class ReceivingServiceImpl implements ReceivingService {
                     count.setCookieId(cookieId);
                     count.setOpenId(openId);
                     count.setReceivingId(receiving.getId());
-                    count.setGmtCreate(Timestamp.from(Instant.now()));
+                    count.setGmtCreate(timestamp);
                     cookieCounts.add(count);
                 } else if (status == CookieStatus.INVALID.ordinal()) {
                     // 失效 cookie 标记，可能是美团、饿了么更新了规则
@@ -297,7 +298,7 @@ public class ReceivingServiceImpl implements ReceivingService {
                     cookieMark.setStatus(CookieStatus.INVALID);
                     cookieMark.setCookieId(cookieId);
                     cookieMark.setUserId(cookie.getUserId());
-                    cookieMark.setGmtCreate(Timestamp.from(Instant.now()));
+                    cookieMark.setGmtCreate(timestamp);
                     cookieMarks.add(cookieMark);
                 } else if (status == CookieStatus.LIMIT.ordinal()) {
                     // 未达到5次领取就失效 cookie 处理
@@ -306,7 +307,7 @@ public class ReceivingServiceImpl implements ReceivingService {
                     cookieMark.setStatus(CookieStatus.LIMIT);
                     cookieMark.setCookieId(cookieId);
                     cookieMark.setUserId(cookie.getUserId());
-                    cookieMark.setGmtCreate(Timestamp.from(Instant.now()));
+                    cookieMark.setGmtCreate(timestamp);
                     cookieMarks.add(cookieMark);
                 } else {
                     queue.offer(cookie);
@@ -320,7 +321,7 @@ public class ReceivingServiceImpl implements ReceivingService {
                 cookieMarkRepository.save(cookieMarks);
             }
             if (resultDTO.getCode() != 0) {
-                saveFailedReceiving(receiving, resultDTO.getMessage());
+                saveFailedReceiving(receiving, resultDTO.getMessage(), timestamp);
                 return;
             }
             if (useCookieCount.get() < 2) {
@@ -328,7 +329,7 @@ public class ReceivingServiceImpl implements ReceivingService {
                 receiving.setNickname(Entities.encodeNickname(redPacketResultDTO.getNickname()));
                 receiving.setPrice(redPacketResultDTO.getPrice());
                 receiving.setDate(redPacketResultDTO.getDate());
-                saveFailedReceiving(receiving, resultDTO.getMessage());
+                saveFailedReceiving(receiving, resultDTO.getMessage(), timestamp);
                 return;
             }
             RedPacketResultDTO redPacketResultDTO = redPacketDTO.getResult();
@@ -336,7 +337,7 @@ public class ReceivingServiceImpl implements ReceivingService {
             receiving.setPrice(redPacketResultDTO.getPrice());
             receiving.setDate(redPacketResultDTO.getDate());
             receiving.setStatus(ReceivingStatus.SUCCESS);
-            receiving.setGmtModified(Timestamp.from(Instant.now()));
+            receiving.setGmtModified(timestamp);
             receivingRepository.save(receiving);
         } catch (IOException e) {
             logger.error("receiving={}, cookies={}", receiving, cookies, e);
@@ -344,10 +345,10 @@ public class ReceivingServiceImpl implements ReceivingService {
             cookies.stream().forEach(cookie -> {
                 queue.offer(cookie);
             });
-            saveFailedReceiving(receiving, e.getMessage());
+            saveFailedReceiving(receiving, e.getMessage(), timestamp);
         } catch (Exception e) {
             logger.error("receiving={}, cookies={}", receiving, cookies, e);
-            saveFailedReceiving(receiving, e.getMessage());
+            saveFailedReceiving(receiving, e.getMessage(), timestamp);
         }
     }
 
@@ -355,7 +356,7 @@ public class ReceivingServiceImpl implements ReceivingService {
         // 23:50至00:10限制领取，防止当前服务时间已达00:00，但是美团或饿了么的服务器的时间还未到00:00，导致 cookie 使用统计出错
         Instant now = Instant.now();
         long nowEpochMilli = now.toEpochMilli();
-        LocalDateTime today = LocalDateTime.of(LocalDate.now(), LocalTime.ofSecondOfDay(0));
+        LocalDateTime today = LocalDate.now().atStartOfDay();
         LocalDateTime tomorrow = today.plusDays(1);
         ZoneOffset defaultZoneOffset = ZoneOffset.ofHours(8);
         logger.info("now={}, today={}, tomorrow={}, defaultZoneOffset={}", now, today, tomorrow, defaultZoneOffset);
@@ -371,11 +372,11 @@ public class ReceivingServiceImpl implements ReceivingService {
         return todayEpochMilli;
     }
 
-    private void saveFailedReceiving(Receiving receiving, String message) {
+    private void saveFailedReceiving(Receiving receiving, String message, Timestamp gmtModified) {
         message = message.length() > 512 ? message.substring(0, 512) : message;
         receiving.setMessage(message);
         receiving.setStatus(ReceivingStatus.FAILURE);
-        receiving.setGmtModified(Timestamp.from(Instant.now()));
+        receiving.setGmtModified(gmtModified);
         receivingRepository.save(receiving);
     }
 

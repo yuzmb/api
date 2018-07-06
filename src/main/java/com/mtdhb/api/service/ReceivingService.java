@@ -1,5 +1,6 @@
 package com.mtdhb.api.service;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.mtdhb.api.constant.e.ThirdPartyApplication;
@@ -24,7 +25,7 @@ public interface ReceivingService {
 
     List<ReceivingTrendDTO> listReceivingTrend(ThirdPartyApplication application);
 
-    List<ReceivingPieDTO> listReceivingPie(ThirdPartyApplication application);
+    List<ReceivingPieDTO> listReceivingPie(ThirdPartyApplication application, Timestamp gmtCreate);
 
     ReceivingDTO save(String key, String url, String phone, ThirdPartyApplication application, long userId);
 

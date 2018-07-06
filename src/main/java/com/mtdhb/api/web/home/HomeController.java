@@ -1,5 +1,8 @@
 package com.mtdhb.api.web.home;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.temporal.ChronoField;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -7,6 +10,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mtdhb.api.constant.e.ThirdPartyApplication;
@@ -28,6 +32,8 @@ public class HomeController {
     private CookieService cookieService;
     @Autowired
     private ReceivingService receivingService;
+
+    private ChronoField[] chronoFields = { ChronoField.DAY_OF_WEEK, ChronoField.DAY_OF_WEEK, ChronoField.DAY_OF_YEAR };
 
     @RequestMapping("/user")
     public Result user(HttpSession session) {
@@ -58,10 +64,15 @@ public class HomeController {
     }
 
     @RequestMapping("/pie")
-    public Result pie() {
+    public Result pie(@RequestParam(value = "type", required = false, defaultValue = "-1") int type) {
+        LocalDate localDate = LocalDate.now();
+        if (type > 0 && type < chronoFields.length) {
+            localDate = localDate.with(chronoFields[type], 1);
+        }
+        Timestamp timestamp = Timestamp.valueOf(localDate.atStartOfDay());
         return Results.success(Stream.of(ThirdPartyApplication.values())
                 .collect(Collectors.toMap(application -> application.name().toLowerCase(),
-                        application -> receivingService.listReceivingPie(application))));
+                        application -> receivingService.listReceivingPie(application, timestamp))));
     }
 
 }

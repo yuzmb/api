@@ -5,8 +5,6 @@ import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -179,7 +177,7 @@ public class UserServiceImpl implements UserService {
     public NumberDTO getNumber(ThirdPartyApplication application, long userId) {
         long total = cookieRepository.countByApplicationAndUserId(application, userId) * 5;
         long used = cookieCountRepository.countByApplicationAndUserIdAndGmtCreateGreaterThan(application, userId,
-                Timestamp.valueOf(LocalDateTime.of(LocalDate.now(), LocalTime.ofSecondOfDay(0))));
+                Timestamp.valueOf(LocalDate.now().atStartOfDay()));
         NumberDTO numberDTO = new NumberDTO();
         numberDTO.setAvailable(total - used);
         numberDTO.setTotal(total);

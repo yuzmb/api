@@ -5,8 +5,6 @@ import java.lang.invoke.MethodHandles;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -126,7 +124,7 @@ public class CookieServiceImpl implements CookieService {
             Cookie last = cookies.getContent().get(numberOfElements - 1);
             long upper = last.getId();
             logger.info("upper={}", upper);
-            Timestamp today = Timestamp.valueOf(LocalDateTime.of(LocalDate.now(), LocalTime.ofSecondOfDay(0)));
+            Timestamp today = Timestamp.valueOf(LocalDate.now().atStartOfDay());
             List<CookieCountView> cookieCountViews = cookieCountRepository.findCookieCountView(application, today,
                     lower, upper);
             logger.info("cookieCountViews#size={}", cookieCountViews.size());

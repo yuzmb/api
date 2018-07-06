@@ -227,10 +227,10 @@ public class UserController {
     private void checkCaptcha(String captcha, String sessionKey, HttpSession session) {
         String sessionCaptcha = (String) session.getAttribute(sessionKey);
         session.removeAttribute(sessionKey);
-        logger.info("sessionCaptcha={}", sessionCaptcha);
+        logger.info("{} captcha={}, sessionCaptcha={}", sessionKey, captcha, sessionCaptcha);
         if (!captcha.equalsIgnoreCase(sessionCaptcha)) {
-            throw new BusinessException(ErrorCode.CAPTCHA_ERROR, "captcha={}, sessionCaptcha={}", captcha,
-                    sessionCaptcha);
+            throw new BusinessException(ErrorCode.CAPTCHA_ERROR, "{} captcha={}, sessionCaptcha={}", sessionKey,
+                    captcha, sessionCaptcha);
         }
     }
 
