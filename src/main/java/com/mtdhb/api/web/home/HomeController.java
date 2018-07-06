@@ -33,7 +33,7 @@ public class HomeController {
     @Autowired
     private ReceivingService receivingService;
 
-    private ChronoField[] chronoFields = { ChronoField.DAY_OF_WEEK, ChronoField.DAY_OF_WEEK, ChronoField.DAY_OF_YEAR };
+    private ChronoField[] chronoFields = { ChronoField.DAY_OF_WEEK, ChronoField.DAY_OF_MONTH, ChronoField.DAY_OF_YEAR };
 
     @RequestMapping("/user")
     public Result user(HttpSession session) {
