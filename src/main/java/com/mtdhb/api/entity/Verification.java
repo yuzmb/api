@@ -26,7 +26,7 @@ import lombok.Data;
 public class Verification {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String object;
     private String code;

@@ -18,7 +18,7 @@ import lombok.Data;
 public class CookieMark {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Enumerated
     private ThirdPartyApplication application;

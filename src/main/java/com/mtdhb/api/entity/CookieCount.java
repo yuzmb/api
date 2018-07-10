@@ -17,7 +17,7 @@ import lombok.Data;
 public class CookieCount {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Enumerated
     private ThirdPartyApplication application;
