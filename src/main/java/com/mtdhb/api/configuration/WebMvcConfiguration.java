@@ -3,7 +3,7 @@ package com.mtdhb.api.configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.mtdhb.api.web.LoginInterceptor;
 
@@ -12,7 +12,7 @@ import com.mtdhb.api.web.LoginInterceptor;
  * @date 2018/05/30
  */
 @Configuration
-public class WebMvcConfiguration extends WebMvcConfigurerAdapter {
+public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Autowired
     private LoginInterceptor loginInterceptor;

@@ -106,7 +106,7 @@ public class ReceivingServiceImpl implements ReceivingService {
     @Override
     public List<ReceivingDTO> list(long userId) {
         Slice<Receiving> reveivings = receivingRepository.findByUserId(userId,
-                new PageRequest(0, 10, new Sort(Sort.Direction.DESC, "id")));
+                PageRequest.of(0, 10, new Sort(Sort.Direction.DESC, "id")));
         List<ReceivingDTO> receivingDTOs = reveivings.getContent().stream().map(reveiving -> {
             ReceivingDTO receivingDTO = new ReceivingDTO();
             BeanUtils.copyProperties(reveiving, receivingDTO);
@@ -120,7 +120,7 @@ public class ReceivingServiceImpl implements ReceivingService {
     @Override
     public List<ReceivingCarouselDTO> listReceivingCarousel() {
         Slice<ReceivingCarouselView> slice = receivingRepository
-                .findReceivingCarouselView(new PageRequest(0, 10, new Sort(Sort.Direction.DESC, "gmtModified")));
+                .findReceivingCarouselView(PageRequest.of(0, 10, new Sort(Sort.Direction.DESC, "gmtModified")));
         List<ReceivingCarouselDTO> carouselReceivingDTOs = slice.map(receivingCarouselView -> {
             ReceivingCarouselDTO receivingCarouselDTO = new ReceivingCarouselDTO();
             String mail = receivingCarouselView.getMail();
@@ -315,10 +315,10 @@ public class ReceivingServiceImpl implements ReceivingService {
             });
             // TODO 可更优化为 mysql native 批量插入
             if (cookieCounts.size() > 0) {
-                cookieCountRepository.save(cookieCounts);
+                cookieCountRepository.saveAll(cookieCounts);
             }
             if (cookieMarks.size() > 0) {
-                cookieMarkRepository.save(cookieMarks);
+                cookieMarkRepository.saveAll(cookieMarks);
             }
             if (resultDTO.getCode() != 0) {
                 saveFailedReceiving(receiving, resultDTO.getMessage(), timestamp);

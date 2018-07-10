@@ -1,5 +1,6 @@
 package com.mtdhb.api.configuration;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,8 +9,9 @@ import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import com.mtdhb.api.cache.SignatureKeyGenerator;
 
@@ -25,19 +27,21 @@ public class CachingConfiguration extends CachingConfigurerSupport {
         return new SignatureKeyGenerator();
     }
 
-    @SuppressWarnings("rawtypes")
     @Bean
-    public CacheManager cacheManager(RedisTemplate redisTemplate) {
-        RedisCacheManager redisCacheManager = new RedisCacheManager(redisTemplate);
-        // 设置缓存过期时间，单位：秒
-        Map<String, Long> expires = new HashMap<>();
-        expires.put("USER_SESSION", 30 * 60L);
-        expires.put("RECEIVING_TREND", 30 * 60L);
-        expires.put("RECEIVING_PIE", 30 * 60L);
-        expires.put("COOKIE_RANK", 15 * 60L);
-        expires.put("RECEIVING_CAROUSEL", 60L);
-        redisCacheManager.setExpires(expires);
-        return redisCacheManager;
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
+        cacheConfigurations.put("RECEIVING_CAROUSEL",
+                RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(60L)));
+        cacheConfigurations.put("USER_SESSION",
+                RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(20L)));
+        cacheConfigurations.put("COOKIE_RANK",
+                RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(30L)));
+        cacheConfigurations.put("RECEIVING_TREND",
+                RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(30L)));
+        cacheConfigurations.put("RECEIVING_PIE",
+                RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(30L)));
+        return RedisCacheManager.builder(connectionFactory).cacheDefaults(RedisCacheConfiguration.defaultCacheConfig())
+                .withInitialCacheConfigurations(cacheConfigurations).transactionAware().build();
     }
 
 }

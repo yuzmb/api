@@ -2,6 +2,9 @@ server:
     port: 8080
 
 spring:
+    jackson:
+        serialization:
+            write-dates-as-timestamps: true
     datasource:
         url: jdbc:mysql://127.0.0.1:3306/api?useUnicode=true&characterEncoding=UTF-8&useSSL=false
         username: 
@@ -10,15 +13,16 @@ spring:
         show-sql: true
 
 management:
-    address: 127.0.0.1
-    context-path: /monitor
-    port: 9000
-    security:
-        enabled: false
-
-endpoints:
-    shutdown:
-        enabled: true
+    server:
+        address: 127.0.0.1
+        port: 8081
+    endpoints:
+        web:
+            exposure:
+                include: "*"
+    endpoint:
+        shutdown:
+            enabled: true
 
 com:
     mtdhb:

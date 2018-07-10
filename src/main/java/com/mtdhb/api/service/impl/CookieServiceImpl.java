@@ -93,7 +93,7 @@ public class CookieServiceImpl implements CookieService {
     @Override
     public List<CookieRankDTO> listCookieRank(ThirdPartyApplication application, long userId) {
         Page<CookieRankView> page = cookieRepository.findCookieRankViewByApplication(application,
-                new PageRequest(0, 100));
+                PageRequest.of(0, 100));
         final AtomicInteger ranking = new AtomicInteger();
         List<CookieRankDTO> cookieRankDTOs = page.map(cookieRankView -> {
             CookieRankDTO cookieRankDTO = new CookieRankDTO();
@@ -115,7 +115,7 @@ public class CookieServiceImpl implements CookieService {
             long lower = endpoint.get();
             logger.info("application={}, lower={}", application, lower);
             Slice<Cookie> cookies = cookieRepository.findByApplicationAndIdGreaterThan(application, lower,
-                    new PageRequest(0, CHUNK_SIZE));
+                    PageRequest.of(0, CHUNK_SIZE));
             int numberOfElements = cookies.getNumberOfElements();
             logger.info("cookies#size={}", numberOfElements);
             if (numberOfElements < 1) {
