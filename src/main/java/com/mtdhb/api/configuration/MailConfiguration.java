@@ -32,12 +32,7 @@ public class MailConfiguration {
     /**
      * 注册邮件模板路径
      */
-    private final static String REGISTER_MAIL_TEMPLATE_PATH = "registerMailTemplate.html";
-    /**
-     * 重置密码模板路径
-     */
-    private final static String RESET_PASSWORD_MAILTEMPLATE_PATH = "resetPasswordMailTemplate.html";
-
+    private String registerMailTemplatePath = "registerMailTemplate.html";
     /**
      * 注册邮件模板
      */
@@ -50,6 +45,10 @@ public class MailConfiguration {
      * 注册邮件有效时间
      */
     private int registerMailEffectiveTime;
+    /**
+     * 重置密码模板路径
+     */
+    private String resetPasswordMailTemplatePath = "resetPasswordMailTemplate.html";
     /**
      * 重置密码邮件模板
      */
@@ -69,17 +68,22 @@ public class MailConfiguration {
 
     @PostConstruct
     public void init() {
-        try (InputStream registerMailTemplateInputStream = UserServiceImpl.class.getClassLoader()
-                .getResourceAsStream(REGISTER_MAIL_TEMPLATE_PATH);
-                InputStream resetPasswordMailTemplateInputStream = UserServiceImpl.class.getClassLoader()
-                        .getResourceAsStream(RESET_PASSWORD_MAILTEMPLATE_PATH)) {
-            registerMailTemplate = new String(IOStreams.readAllBytes(registerMailTemplateInputStream),
-                    StandardCharsets.UTF_8);
-            resetPasswordMailTemplate = new String(IOStreams.readAllBytes(resetPasswordMailTemplateInputStream),
-                    StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            logger.error("mailConfiguration={}", this, e);
+        if (registerMailTemplate == null) {
+            registerMailTemplate = read(registerMailTemplatePath);
         }
+        if (resetPasswordMailTemplate == null) {
+            resetPasswordMailTemplate = read(resetPasswordMailTemplatePath);
+        }
+    }
+
+    private String read(String path) {
+        String template = null;
+        try (InputStream in = UserServiceImpl.class.getClassLoader().getResourceAsStream(path)) {
+            template = new String(IOStreams.readAllBytes(in), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            logger.error("path={}", path, e);
+        }
+        return template;
     }
 
 }
