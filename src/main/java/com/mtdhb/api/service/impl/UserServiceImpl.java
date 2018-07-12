@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mtdhb.api.configuration.MailConfiguration;
+import com.mtdhb.api.constant.CacheNames;
 import com.mtdhb.api.constant.e.ErrorCode;
 import com.mtdhb.api.constant.e.Purpose;
 import com.mtdhb.api.constant.e.ThirdPartyApplication;
@@ -156,7 +157,7 @@ public class UserServiceImpl implements UserService {
                 mailConfiguration.getResetPasswordMailTemplate());
     }
 
-    @Cacheable(cacheNames = "USER_SESSION")
+    @Cacheable(cacheNames = CacheNames.USER)
     @Override
     public UserDTO getByToken(String token) {
         User user = userRepository.findByToken(token);

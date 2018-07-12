@@ -14,13 +14,13 @@ import com.mtdhb.api.dto.CookieRankDTO;
 public interface CookieService {
 
     List<CookieDTO> list(long userId);
-    
-    List<CookieRankDTO> listCookieRank(ThirdPartyApplication applicaton, long userId);
-    
+
+    List<CookieRankDTO> listCookieRank(ThirdPartyApplication applicaton);
+
     void load(ThirdPartyApplication application);
 
     CookieDTO save(String value, ThirdPartyApplication application, long userId) throws IOException;
-    
+
     void delete(long cookieId, long userId);
 
 }

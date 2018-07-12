@@ -28,6 +28,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.mtdhb.api.constant.CacheNames;
 import com.mtdhb.api.constant.e.CookieStatus;
 import com.mtdhb.api.constant.e.ErrorCode;
 import com.mtdhb.api.constant.e.ReceivingStatus;
@@ -116,7 +117,7 @@ public class ReceivingServiceImpl implements ReceivingService {
         return receivingDTOs;
     }
 
-    @Cacheable(cacheNames = "RECEIVING_CAROUSEL")
+    @Cacheable(cacheNames = CacheNames.RECEIVING_CAROUSEL)
     @Override
     public List<ReceivingCarouselDTO> listReceivingCarousel() {
         Slice<ReceivingCarouselView> slice = receivingRepository
@@ -135,7 +136,7 @@ public class ReceivingServiceImpl implements ReceivingService {
         return carouselReceivingDTOs;
     }
 
-    @Cacheable(cacheNames = "RECEIVING_TREND")
+    @Cacheable(cacheNames = CacheNames.RECEIVING_TREND)
     @Override
     public List<ReceivingTrendDTO> listReceivingTrend(ThirdPartyApplication application) {
         Timestamp thisWeek = Timestamp.valueOf(LocalDate.now().atStartOfDay().minusDays(6));
@@ -149,7 +150,7 @@ public class ReceivingServiceImpl implements ReceivingService {
         return receivingTrendDTOs;
     }
 
-    @Cacheable(cacheNames = "RECEIVING_PIE")
+    @Cacheable(cacheNames = CacheNames.RECEIVING_PIE)
     @Override
     public List<ReceivingPieDTO> listReceivingPie(ThirdPartyApplication application, Timestamp gmtCreate) {
         int scale = 100000;

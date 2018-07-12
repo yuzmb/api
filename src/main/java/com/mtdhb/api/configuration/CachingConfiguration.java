@@ -12,8 +12,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext.SerializationPair;
 
 import com.mtdhb.api.cache.SignatureKeyGenerator;
+import com.mtdhb.api.constant.CacheNames;
 
 /**
  * @author i@huangdenghe.com
@@ -30,18 +33,20 @@ public class CachingConfiguration extends CachingConfigurerSupport {
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-        cacheConfigurations.put("RECEIVING_CAROUSEL",
-                RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(60L)));
-        cacheConfigurations.put("USER_SESSION",
+        cacheConfigurations.put(CacheNames.USER,
                 RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(20L)));
-        cacheConfigurations.put("COOKIE_RANK",
+        cacheConfigurations.put(CacheNames.COOKIE_RANK,
                 RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(30L)));
-        cacheConfigurations.put("RECEIVING_TREND",
+        cacheConfigurations.put(CacheNames.RECEIVING_CAROUSEL,
+                RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(60L)));
+        cacheConfigurations.put(CacheNames.RECEIVING_TREND,
                 RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(30L)));
-        cacheConfigurations.put("RECEIVING_PIE",
+        cacheConfigurations.put(CacheNames.RECEIVING_PIE,
                 RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(30L)));
-        return RedisCacheManager.builder(connectionFactory).cacheDefaults(RedisCacheConfiguration.defaultCacheConfig())
-                .withInitialCacheConfigurations(cacheConfigurations).transactionAware().build();
+        return RedisCacheManager.builder(connectionFactory)
+                .cacheDefaults(RedisCacheConfiguration.defaultCacheConfig().serializeValuesWith(
+                        SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer())))
+                .withInitialCacheConfigurations(cacheConfigurations).build();
     }
 
 }

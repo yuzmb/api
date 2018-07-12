@@ -25,6 +25,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.mtdhb.api.constant.CacheNames;
 import com.mtdhb.api.constant.e.ErrorCode;
 import com.mtdhb.api.constant.e.HttpService;
 import com.mtdhb.api.constant.e.ReceivingStatus;
@@ -89,9 +90,9 @@ public class CookieServiceImpl implements CookieService {
         return cookieDTOs;
     }
 
-    @Cacheable(cacheNames = "COOKIE_RANK")
+    @Cacheable(cacheNames = CacheNames.COOKIE_RANK)
     @Override
-    public List<CookieRankDTO> listCookieRank(ThirdPartyApplication application, long userId) {
+    public List<CookieRankDTO> listCookieRank(ThirdPartyApplication application) {
         Page<CookieRankView> page = cookieRepository.findCookieRankViewByApplication(application,
                 PageRequest.of(0, 100));
         final AtomicInteger ranking = new AtomicInteger();

@@ -50,10 +50,9 @@ public class HomeController {
 
     @RequestMapping("/rank")
     public Result rank() {
-        UserDTO userDTO = RequestContextHolder.get();
         return Results.success(Stream.of(ThirdPartyApplication.values())
                 .collect(Collectors.toMap(application -> application.name().toLowerCase(),
-                        application -> cookieService.listCookieRank(application, userDTO.getId()))));
+                        application -> cookieService.listCookieRank(application))));
     }
 
     @RequestMapping("/trend")
