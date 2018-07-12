@@ -1,6 +1,5 @@
 package com.mtdhb.api.dto;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 import lombok.Data;
@@ -10,9 +9,7 @@ import lombok.Data;
  * @date 2018/04/17
  */
 @Data
-public class ReceivingTrendDTO implements Serializable {
-
-    private static final long serialVersionUID = -2695002604795431382L;
+public class ReceivingTrendDTO {
 
     private String date;
     private BigDecimal totalPrice;

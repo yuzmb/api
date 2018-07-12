@@ -3,8 +3,6 @@
  */
 package com.mtdhb.api.dto;
 
-import java.io.Serializable;
-
 import lombok.Data;
 
 /**
@@ -12,9 +10,7 @@ import lombok.Data;
  * @date 2017/12/10
  */
 @Data
-public class UserDTO implements Serializable {
-
-    private static final long serialVersionUID = 2084135877780190421L;
+public class UserDTO {
 
     private Long id;
     private String avatar;
