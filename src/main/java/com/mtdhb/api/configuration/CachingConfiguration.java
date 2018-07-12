@@ -34,6 +34,7 @@ public class CachingConfiguration extends CachingConfigurerSupport {
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
         RedisCacheConfiguration defaultCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
+                .disableCachingNullValues()
                 .serializeValuesWith(SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
         cacheConfigurations.put(CacheNames.USER, defaultCacheConfiguration.entryTtl(Duration.ofMinutes(20L)));
         cacheConfigurations.put(CacheNames.COOKIE_RANK, defaultCacheConfiguration.entryTtl(Duration.ofMinutes(30L)));
