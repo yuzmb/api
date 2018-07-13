@@ -1,6 +1,7 @@
 package com.mtdhb.api.service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import com.mtdhb.api.entity.Cookie;
 import com.mtdhb.api.entity.Receiving;
@@ -16,5 +17,7 @@ public interface AsyncService {
     void dispatch(Receiving receiving, long available);
 
     void receive(Receiving receiving, List<Cookie> cookies, long available);
+
+    void destroy(long timeout, TimeUnit unit) throws InterruptedException;
 
 }

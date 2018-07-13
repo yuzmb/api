@@ -25,15 +25,15 @@ public class Connections {
 
     private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final static int DEFAULT_TIME_OUT = 2 * 60 * 1000;
+    private final static int DEFAULT_TIME_OUT = 1 * 60 * 1000;
 
     public static String getRedirectURL(String spec) throws IOException {
-        logger.info("redirect: spec={}", spec);
+        logger.info("Redirect: spec={}", spec);
         HttpURLConnection connection = (HttpURLConnection) openConnection(spec);
         // 禁止重定向
         connection.setInstanceFollowRedirects(false);
         String location = connection.getHeaderField(HttpHeaders.LOCATION);
-        logger.info("redirect: location={}", location);
+        logger.info("Redirect: location={}", location);
         return location;
 
     }
@@ -41,7 +41,7 @@ public class Connections {
     public static <T> T post(String spec, Object arg, TypeReference<?> valueTypeRef) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         String parameter = objectMapper.writeValueAsString(arg);
-        logger.info("nodejs request: spec={}, parameter={}", spec, parameter);
+        logger.info("Node.js request: spec={}, parameter={}", spec, parameter);
         URLConnection connection = openConnection(spec);
         connection.addRequestProperty(HttpHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE);
         connection.setConnectTimeout(DEFAULT_TIME_OUT);
@@ -54,7 +54,7 @@ public class Connections {
         try (InputStream in = connection.getInputStream()) {
             byte[] b = IOStreams.readAllBytes(in);
             String body = new String(b, StandardCharsets.UTF_8);
-            logger.info("nodejs response: body={}", body);
+            logger.info("Node.js response: body={}", body);
             return objectMapper.readValue(body, valueTypeRef);
         }
     }

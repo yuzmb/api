@@ -6,6 +6,6 @@ package com.mtdhb.api.service;
  */
 public interface CookieCountService {
 
-    void delete();
+    void deleteAll();
 
 }

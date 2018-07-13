@@ -17,7 +17,7 @@ public class CookieCountServiceImpl implements CookieCountService {
     private CookieCountRepository cookieCountRepository;
 
     @Override
-    public void delete() {
+    public void deleteAll() {
         cookieCountRepository.deleteAll();
     }
 

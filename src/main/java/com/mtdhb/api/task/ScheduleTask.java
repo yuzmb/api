@@ -49,7 +49,7 @@ public class ScheduleTask {
     @Scheduled(cron = "0 55 23 * * ?")
     public void clear() {
         logger.info("Clear starting...");
-        cookieCountService.delete();
+        cookieCountService.deleteAll();
     }
 
 }

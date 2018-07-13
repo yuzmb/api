@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -27,6 +27,7 @@ import com.mtdhb.api.constant.ThreadPoolNames;
 import com.mtdhb.api.constant.e.ThirdPartyApplication;
 import com.mtdhb.api.entity.Cookie;
 import com.mtdhb.api.factory.NamedThreadFactory;
+import com.mtdhb.api.service.AsyncService;
 
 /**
  * @author i@huangdenghe.com
@@ -44,10 +45,10 @@ public class Application {
     }
 
     @Bean
-    public ThreadPoolExecutor sendMailPool() {
+    public ThreadPoolExecutor sendMailThreadPool() {
         // TODO 先用无界队列，崩了再说
-        return new ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<>(),
-                new NamedThreadFactory(ThreadPoolNames.SEND_MAIL_POOL));
+        return new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+                new NamedThreadFactory(ThreadPoolNames.SEND_MAIL_THREAD_POOL));
     }
 
     @Bean
@@ -63,21 +64,21 @@ public class Application {
     }
 
     @Bean
-    public ThreadPoolExecutor[] dispatchPools() {
+    public ThreadPoolExecutor[] dispatchThreadPools() {
         // TODO 先用无界队列，崩了再说
         return Stream.of(ThirdPartyApplication.values())
-                .map(application -> new ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<>(),
-                        new NamedThreadFactory(ThreadPoolNames.DISPATCH_POOL + application.name())))
+                .map(application -> new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+                        new NamedThreadFactory(application.name() + ThreadPoolNames.DISPATCH_THREAD_POOL)))
                 .toArray(ThreadPoolExecutor[]::new);
     }
 
     @Bean
-    public ThreadPoolExecutor[] receivePools() {
+    public ThreadPoolExecutor[] receiveThreadPools() {
         // TODO 先用无界队列，崩了再说
         return Stream.of(ThirdPartyApplication.values()).map(application -> {
             int poolSize = application.ordinal() + 1 << 2;
-            return new ThreadPoolExecutor(poolSize, poolSize, 1L, TimeUnit.MINUTES, new LinkedBlockingQueue<>(),
-                    new NamedThreadFactory(ThreadPoolNames.RECEIVE_POOL + application.name()));
+            return new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+                    new NamedThreadFactory(application.name() + ThreadPoolNames.RECEIVE_THREAD_POOL));
         }).toArray(ThreadPoolExecutor[]::new);
     }
 
@@ -89,45 +90,26 @@ public class Application {
 
     @Bean
     public int[] thresholds() {
-        // 美团拼手气红包最多20个，饿了么10个
+        // 美团拼手气红包最多 20 个，饿了么 10 个
         return new int[] { 20, 10 };
     }
 
     @Bean
     public BigDecimal[] mins() {
-        // 美团拼手气红包的手气最佳红包的最小金额3.6，饿了么4.6
+        // 美团拼手气红包的手气最佳红包的最小金额 3.6，饿了么 4.6
         return new BigDecimal[] { new BigDecimal("3.3"), new BigDecimal("4.6") };
     }
 
-    @Resource(name = "dispatchPools")
-    private ThreadPoolExecutor[] dispatchPools;
-
-    @Resource(name = "receivePools")
-    private ThreadPoolExecutor[] receivePools;
+    @Autowired
+    private AsyncService asyncService;
 
     @PreDestroy
     public void preDestroy() {
-        // TODO 待优化
-        // 关闭调度线程池
-        Stream.of(dispatchPools).forEach(asynDispatchPool -> {
-            List<Runnable> tasks = asynDispatchPool.shutdownNow();
-            logger.info("DispatchTasks#size={}", tasks.size());
-            try {
-                asynDispatchPool.awaitTermination(30, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                logger.error(e.getMessage(), e);
-            }
-        });
-        // 关闭领取线程池
-        Stream.of(receivePools).forEach(asynReceivePool -> {
-            List<Runnable> tasks = asynReceivePool.shutdownNow();
-            logger.info("ReceiveTasks#size={}", tasks.size());
-            try {
-                asynReceivePool.awaitTermination(30, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                logger.error(e.getMessage(), e);
-            }
-        });
+        try {
+            asyncService.destroy(90, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage(), e);
+        }
     }
 
 }

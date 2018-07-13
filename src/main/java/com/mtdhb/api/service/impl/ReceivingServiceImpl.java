@@ -281,7 +281,7 @@ public class ReceivingServiceImpl implements ReceivingService {
                     long n = usage.remove(openId) + 1;
                     if (n < 5) {
                         usage.put(openId, n);
-                        // 未达到5次领取则放回队列
+                        // 未达到 5 次领取则放回队列
                         queue.offer(cookie);
                     }
                     CookieCount count = new CookieCount();
@@ -354,7 +354,7 @@ public class ReceivingServiceImpl implements ReceivingService {
     }
 
     private long checkReceiveTime() {
-        // 23:50至00:10限制领取，防止当前服务时间已达00:00，但是美团或饿了么的服务器的时间还未到00:00，导致 cookie 使用统计出错
+        // 23:50 至 00:10 限制领取，防止当前服务时间已达 00:00，但是美团或饿了么的服务器的时间还未到 00:00，导致 cookie 使用统计出错
         Instant now = Instant.now();
         long nowEpochMilli = now.toEpochMilli();
         LocalDateTime today = LocalDate.now().atStartOfDay();
