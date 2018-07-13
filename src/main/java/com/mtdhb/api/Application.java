@@ -1,6 +1,5 @@
 package com.mtdhb.api;
 
-import java.lang.invoke.MethodHandles;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +13,6 @@ import java.util.stream.Stream;
 
 import javax.annotation.PreDestroy;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -37,8 +34,6 @@ import com.mtdhb.api.service.AsyncService;
 @EnableScheduling
 @EnableCaching
 public class Application {
-
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     public static void main(String[] args) throws Exception {
         SpringApplication.run(Application.class, args);
@@ -105,11 +100,7 @@ public class Application {
 
     @PreDestroy
     public void preDestroy() {
-        try {
-            asyncService.destroy(90, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            logger.error(e.getMessage(), e);
-        }
+        asyncService.destroy();
     }
 
 }

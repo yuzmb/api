@@ -1,7 +1,7 @@
 package com.mtdhb.api.service.impl;
 
+import java.lang.invoke.MethodHandles;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -9,6 +9,8 @@ import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,8 @@ import com.mtdhb.api.task.ShutdownTask;
  */
 @Service
 public class AsyncServiceImpl implements AsyncService {
+
+    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
     private ReceivingService receivingService;
@@ -60,24 +64,34 @@ public class AsyncServiceImpl implements AsyncService {
     }
 
     @Override
-    public void destroy(long timeout, TimeUnit unit) throws InterruptedException {
+    public void destroy() {
+        long timeout = 1L;
+        TimeUnit unit = TimeUnit.MINUTES;
         int poolSize = 1 + dispatchThreadPools.length + receiveThreadPools.length;
-        CountDownLatch countDownLatch = new CountDownLatch(poolSize);
         ThreadPoolExecutor shutdownThreadPool = new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(), new NamedThreadFactory(ThreadPoolNames.SHUTDOWN_THREAD_POOL));
         shutdownThreadPool
-                .execute(new ShutdownTask(ThreadPoolNames.SEND_MAIL_THREAD_POOL, sendMailThreadPool, countDownLatch));
+                .execute(new ShutdownTask(ThreadPoolNames.SEND_MAIL_THREAD_POOL, sendMailThreadPool, timeout, unit));
         Stream.of(ThirdPartyApplication.values()).forEach(application -> {
             String applicationName = application.name();
             int applicationOrdinal = application.ordinal();
             shutdownThreadPool.execute(new ShutdownTask(applicationName + ThreadPoolNames.DISPATCH_THREAD_POOL,
-                    dispatchThreadPools[applicationOrdinal], countDownLatch));
+                    dispatchThreadPools[applicationOrdinal], timeout, unit));
             shutdownThreadPool.execute(new ShutdownTask(applicationName + ThreadPoolNames.RECEIVE_THREAD_POOL,
-                    receiveThreadPools[applicationOrdinal], countDownLatch));
+                    receiveThreadPools[applicationOrdinal], timeout, unit));
         });
-        countDownLatch.await(timeout, unit);
-        shutdownThreadPool.shutdownNow();
-        shutdownThreadPool.awaitTermination(timeout, unit);
+        shutdownThreadPool.shutdown();
+        try {
+            boolean isTerminated = shutdownThreadPool.awaitTermination(timeout, unit);
+            logger.info("{} shutdown isTerminated={}", ThreadPoolNames.SHUTDOWN_THREAD_POOL, isTerminated);
+            if (!isTerminated) {
+                shutdownThreadPool.shutdownNow();
+                isTerminated = shutdownThreadPool.awaitTermination(timeout, unit);
+                logger.info("{} shutdownNow isTerminated={}", ThreadPoolNames.SHUTDOWN_THREAD_POOL, isTerminated);
+            }
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage(), e);
+        }
     }
 
 }
