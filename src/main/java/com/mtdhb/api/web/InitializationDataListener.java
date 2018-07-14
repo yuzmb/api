@@ -26,7 +26,7 @@ import com.mtdhb.api.service.UserService;
 @Component
 public class InitializationDataListener implements ApplicationListener<ContextRefreshedEvent> {
 
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
     private AsyncService asyncService;

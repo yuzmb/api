@@ -49,11 +49,11 @@ import com.mtdhb.api.web.RequestContextHolder;
 @RestController
 public class UserController {
 
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final static String RECEIVE_LOCK_PREFIX = "receivingService#save";
+    private static final String RECEIVE_LOCK_PREFIX = "receivingService#save";
 
-    private final static Pattern PATTERN = Pattern.compile("^Cookie:.+", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN = Pattern.compile("^Cookie:.+", Pattern.CASE_INSENSITIVE);
 
     @Autowired
     private UserService userService;

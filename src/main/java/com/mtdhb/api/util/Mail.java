@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Mail {
 
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private ArrayList<Properties> propertiesList = new ArrayList<>();
     private ArrayList<Session> sessionList = new ArrayList<>();
@@ -65,7 +65,7 @@ public class Mail {
     }
 
     public static Mail getInstance() {
-        return LazyHolder.instance;
+        return LazyHolder.INSTANCE;
     }
 
     /**
@@ -179,7 +179,7 @@ public class Mail {
     }
 
     private static class LazyHolder {
-        private static final Mail instance = new Mail();
+        private static final Mail INSTANCE = new Mail();
     }
 
 }

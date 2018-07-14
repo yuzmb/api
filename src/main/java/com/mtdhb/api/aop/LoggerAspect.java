@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Aspect
 public class LoggerAspect {
 
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Pointcut("execution(* com.mtdhb.api.web.home.*.*(..))")
     private void controller() {

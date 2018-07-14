@@ -23,7 +23,7 @@ import com.mtdhb.api.util.Results;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @ExceptionHandler(BusinessException.class)
     public Result handleBusinessException(BusinessException e) {

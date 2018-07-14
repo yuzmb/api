@@ -12,6 +12,10 @@ import com.mtdhb.api.constant.e.ThirdPartyApplication;
 
 import lombok.Data;
 
+/**
+ * @author i@huangdenghe.com
+ * @date 2018/07/14
+ */
 @Data
 @Entity
 public class CookieCount {

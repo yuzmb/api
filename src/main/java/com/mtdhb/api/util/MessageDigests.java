@@ -22,7 +22,7 @@ import com.mtdhb.api.constant.Constants;
  */
 public class MessageDigests {
 
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     public static final String MD5 = "MD5";
     /**

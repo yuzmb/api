@@ -24,7 +24,7 @@ import com.mtdhb.api.service.UserService;
 @Component
 public class LoginInterceptor extends HandlerInterceptorAdapter {
 
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     @Autowired
     private UserService userService;
 

@@ -33,7 +33,7 @@ import com.mtdhb.api.task.ShutdownTask;
 @Service
 public class AsyncServiceImpl implements AsyncService {
 
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
     private ReceivingService receivingService;

@@ -23,9 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class Connections {
 
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final static int DEFAULT_TIME_OUT = 1 * 60 * 1000;
+    private static final int DEFAULT_TIME_OUT = 1 * 60 * 1000;
 
     public static String getRedirectURL(String spec) throws IOException {
         logger.info("Redirect: spec={}", spec);

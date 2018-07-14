@@ -66,7 +66,7 @@ import com.mtdhb.api.util.Entities;
 @Service
 public class ReceivingServiceImpl implements ReceivingService {
 
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
     private AsyncService asyncService;

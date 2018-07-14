@@ -26,7 +26,7 @@ public interface ReceivingRepository extends CrudRepository<Receiving, Long> {
     Receiving findByApplicationAndStatusAndUserId(ThirdPartyApplication application, ReceivingStatus status,
             long userId);
 
-    Receiving findByUrlKeyAndApplicationAndStatusNot(String UrlKey, ThirdPartyApplication application,
+    Receiving findByUrlKeyAndApplicationAndStatusNot(String urlKey, ThirdPartyApplication application,
             ReceivingStatus status);
 
     Slice<Receiving> findByUserId(Long userId, Pageable pageable);

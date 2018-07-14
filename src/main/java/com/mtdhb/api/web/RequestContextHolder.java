@@ -10,18 +10,18 @@ import com.mtdhb.api.dto.UserDTO;
  */
 public abstract class RequestContextHolder {
 
-    private static final ThreadLocal<UserDTO> holder = new NamedThreadLocal<UserDTO>("UserDTO");
+    private static final ThreadLocal<UserDTO> HOLDER = new NamedThreadLocal<UserDTO>("UserDTO");
 
     public static void reset() {
-        holder.remove();
+        HOLDER.remove();
     }
 
     public static void set(UserDTO value) {
-        holder.set(value);
+        HOLDER.set(value);
     }
 
     public static UserDTO get() {
-        return holder.get();
+        return HOLDER.get();
     }
 
 }

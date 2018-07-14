@@ -13,7 +13,7 @@ import com.mtdhb.api.util.Mail;
  */
 public class SendMailTask implements Runnable {
 
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private String to;
     private String subject;

@@ -11,7 +11,7 @@ import org.apache.tomcat.util.codec.binary.Base64;
  */
 public class Entities {
 
-    private final static Pattern PATTERN = Pattern.compile("^(\\d{3})\\d{4}(\\d{4})$");
+    private static final Pattern PATTERN = Pattern.compile("^(\\d{3})\\d{4}(\\d{4})$");
 
     public static String digestUserPassword(String password, String salt) {
         return MessageDigests.digest(password + salt, MessageDigests.SHA_512);

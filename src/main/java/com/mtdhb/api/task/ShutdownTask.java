@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ShutdownTask implements Runnable {
 
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private String threadPoolName;
     private ExecutorService executorService;

@@ -20,10 +20,14 @@ import com.mtdhb.api.entity.Cookie;
 import com.mtdhb.api.service.CookieCountService;
 import com.mtdhb.api.service.CookieService;
 
+/**
+ * @author i@huangdenghe.com
+ * @date 2018/07/14
+ */
 @Component
 public class ScheduleTask {
 
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     @Autowired
     private CookieService cookieService;
     @Autowired

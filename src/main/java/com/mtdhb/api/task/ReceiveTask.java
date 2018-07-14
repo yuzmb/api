@@ -16,7 +16,7 @@ import com.mtdhb.api.service.ReceivingService;
  */
 public class ReceiveTask implements Runnable {
 
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private ReceivingService receivingService;
     private Receiving receiving;

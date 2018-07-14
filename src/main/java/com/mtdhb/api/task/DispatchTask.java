@@ -8,9 +8,13 @@ import org.slf4j.LoggerFactory;
 import com.mtdhb.api.entity.Receiving;
 import com.mtdhb.api.service.ReceivingService;
 
+/**
+ * @author i@huangdenghe.com
+ * @date 2018/07/14
+ */
 public class DispatchTask implements Runnable {
 
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private ReceivingService receivingService;
     private Receiving receiving;

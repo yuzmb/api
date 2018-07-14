@@ -43,7 +43,7 @@ import com.mtdhb.api.util.SecureRandoms;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
     private AsyncService asyncService;
