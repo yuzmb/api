@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
-import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -15,7 +13,6 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext.SerializationPair;
 
-import com.mtdhb.api.cache.SignatureKeyGenerator;
 import com.mtdhb.api.constant.CacheNames;
 
 /**
@@ -23,12 +20,7 @@ import com.mtdhb.api.constant.CacheNames;
  * @date 2018/05/30
  */
 @Configuration
-public class CachingConfiguration extends CachingConfigurerSupport {
-
-    @Override
-    public KeyGenerator keyGenerator() {
-        return new SignatureKeyGenerator();
-    }
+public class CachingConfiguration {
 
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {

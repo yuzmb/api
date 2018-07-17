@@ -11,9 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.mtdhb.api.configuration.MailConfiguration;
 import com.mtdhb.api.constant.CacheNames;
@@ -46,6 +46,8 @@ public class UserServiceImpl implements UserService {
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
+    private CacheManager cacheManager;
+    @Autowired
     private AsyncService asyncService;
     @Autowired
     private CookieRepository cookieRepository;
@@ -74,7 +76,6 @@ public class UserServiceImpl implements UserService {
         return userDTO;
     }
 
-    @Transactional
     @Override
     public UserDTO registerByMail(AccountDTO accountDTO) {
         Instant now = Instant.now();
@@ -120,7 +121,6 @@ public class UserServiceImpl implements UserService {
                 mailConfiguration.getRegisterMailTemplate());
     }
 
-    @Transactional
     @Override
     public UserDTO resetPassword(AccountDTO accountDTO) {
         Instant now = Instant.now();
@@ -138,10 +138,13 @@ public class UserServiceImpl implements UserService {
         verification.setGmtModified(timestamp);
         verificationRepository.save(verification);
         User user = userRepository.findByMail(verification.getObject());
+        String token = user.getToken();
         user.setPassword(Entities.digestUserPassword(accountDTO.getPassword(), user.getSalt()));
         user.setToken(Entities.generateUserToken());
         user.setGmtModified(timestamp);
         userRepository.save(user);
+        // 使该用户旧 token 失效
+        cacheManager.getCache(CacheNames.USER).evict(token);
         UserDTO userDTO = new UserDTO();
         BeanUtils.copyProperties(user, userDTO);
         return userDTO;

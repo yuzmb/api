@@ -10,6 +10,7 @@ import org.springframework.cache.interceptor.SimpleKey;
  * @date 2018/05/28
  * @see org.springframework.cache.interceptor.SimpleKeyGenerator
  */
+@Deprecated
 public class SignatureKeyGenerator implements KeyGenerator {
 
     @Override
