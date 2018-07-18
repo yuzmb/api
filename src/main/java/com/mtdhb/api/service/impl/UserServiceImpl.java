@@ -1,14 +1,11 @@
 package com.mtdhb.api.service.impl;
 
-import java.lang.invoke.MethodHandles;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
@@ -42,8 +39,6 @@ import com.mtdhb.api.util.SecureRandoms;
  */
 @Service
 public class UserServiceImpl implements UserService {
-
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
     private CacheManager cacheManager;
@@ -80,20 +75,17 @@ public class UserServiceImpl implements UserService {
     public UserDTO registerByMail(AccountDTO accountDTO) {
         Instant now = Instant.now();
         Timestamp timestamp = Timestamp.from(now);
-        Timestamp before = Timestamp
+        Timestamp effectiveTime = Timestamp
                 .from(now.minus(Duration.ofMinutes(mailConfiguration.getRegisterMailEffectiveTime())));
-        logger.info("before={}", before);
-        Verification verification = verificationRepository.findByCodeAndTypeAndPurposeAndUsedAndGmtCreateGreaterThan(
-                accountDTO.getVerificationCode(), VerificationType.MAIL, Purpose.REGISTER, false, before);
-        if (verification == null) {
-            throw new BusinessException(ErrorCode.MAIL_VERIFICATION_EXCEPTION, "accountDTO={}, verification={}",
-                    accountDTO, verification);
+        Verification verification = verify(accountDTO.getVerificationCode(), VerificationType.MAIL, Purpose.REGISTER,
+                effectiveTime, timestamp);
+        String mail = verification.getObject();
+        User user = userRepository.findByMail(mail);
+        if (user != null) {
+            throw new BusinessException(ErrorCode.MAIL_EXIST, "mail={}, user{}", mail, user);
         }
-        verification.setUsed(true);
-        verification.setGmtModified(timestamp);
-        verificationRepository.save(verification);
-        User user = new User();
-        user.setMail(verification.getObject());
+        user = new User();
+        user.setMail(mail);
         String salt = SecureRandoms.nextHex();
         user.setSalt(salt);
         user.setPassword(Entities.digestUserPassword(accountDTO.getPassword(), salt));
@@ -125,18 +117,10 @@ public class UserServiceImpl implements UserService {
     public UserDTO resetPassword(AccountDTO accountDTO) {
         Instant now = Instant.now();
         Timestamp timestamp = Timestamp.from(now);
-        Timestamp before = Timestamp
+        Timestamp effectiveTime = Timestamp
                 .from(now.minus(Duration.ofMinutes(mailConfiguration.getResetPasswordMailEffectiveTime())));
-        logger.info("before={}", before);
-        Verification verification = verificationRepository.findByCodeAndTypeAndPurposeAndUsedAndGmtCreateGreaterThan(
-                accountDTO.getVerificationCode(), VerificationType.MAIL, Purpose.RESET_PASSWORD, false, before);
-        if (verification == null) {
-            throw new BusinessException(ErrorCode.MAIL_VERIFICATION_EXCEPTION, "accountDTO={}, verification={}",
-                    accountDTO, verification);
-        }
-        verification.setUsed(true);
-        verification.setGmtModified(timestamp);
-        verificationRepository.save(verification);
+        Verification verification = verify(accountDTO.getVerificationCode(), VerificationType.MAIL,
+                Purpose.RESET_PASSWORD, effectiveTime, timestamp);
         User user = userRepository.findByMail(verification.getObject());
         String token = user.getToken();
         user.setPassword(Entities.digestUserPassword(accountDTO.getPassword(), user.getSalt()));
@@ -186,6 +170,21 @@ public class UserServiceImpl implements UserService {
         numberDTO.setAvailable(total - used);
         numberDTO.setTotal(total);
         return numberDTO;
+    }
+
+    private Verification verify(String code, VerificationType type, Purpose purpose, Timestamp effectiveTime,
+            Timestamp timestamp) {
+        Verification verification = verificationRepository
+                .findByCodeAndTypeAndPurposeAndUsedAndGmtCreateGreaterThan(code, type, purpose, false, effectiveTime);
+        if (verification == null) {
+            throw new BusinessException(ErrorCode.MAIL_VERIFICATION_EXCEPTION,
+                    "code={}, type={}, purpose={}, effectiveTime={}, verification={}", code, type, purpose,
+                    effectiveTime, verification);
+        }
+        verification.setUsed(true);
+        verification.setGmtModified(timestamp);
+        verificationRepository.save(verification);
+        return verification;
     }
 
     private void sendMail(String mail, Purpose purpose, String subject, String template) {
