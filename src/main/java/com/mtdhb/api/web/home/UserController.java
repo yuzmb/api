@@ -39,6 +39,7 @@ import com.mtdhb.api.service.UserService;
 import com.mtdhb.api.util.Captcha;
 import com.mtdhb.api.util.Connections;
 import com.mtdhb.api.util.Results;
+import com.mtdhb.api.util.Synchronizes;
 import com.mtdhb.api.web.RequestContextHolder;
 
 /**
@@ -50,8 +51,6 @@ import com.mtdhb.api.web.RequestContextHolder;
 public class UserController {
 
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-    private static final String RECEIVE_LOCK_PREFIX = "receivingService#save";
 
     private static final Pattern PATTERN = Pattern.compile("^Cookie:.+", Pattern.CASE_INSENSITIVE);
 
@@ -153,7 +152,7 @@ public class UserController {
         UserDTO userDTO = RequestContextHolder.get();
         long userId = userDTO.getId();
         url = url.trim();
-        String key = null;
+        String urlKey = null;
         ThirdPartyApplication application = null;
         ReceivingDTO receivingDTO = null;
         // 某些地方复制出的链接带 &amp; 而不是 &
@@ -174,21 +173,21 @@ public class UserController {
             throw new BusinessException(ErrorCode.URL_ERROR, "url={}", url);
         }
         if (url.startsWith("https://h5.ele.me/hongbao/")) {
-            key = getParmeter(spec.getRef(), "sn");
+            urlKey = getParmeter(spec.getRef(), "sn");
             application = ThirdPartyApplication.ELE;
         } else if (url.startsWith("https://activity.waimai.meituan.com/")
                 || url.startsWith("http://activity.waimai.meituan.com/")) {
-            key = getParmeter(spec.getQuery(), "urlKey");
+            urlKey = getParmeter(spec.getQuery(), "urlKey");
             application = ThirdPartyApplication.MEITUAN;
         }
-        if (key == null) {
+        if (urlKey == null) {
             throw new BusinessException(ErrorCode.URL_ERROR, "url={}", url);
         }
-        String receivingLock = new StringBuilder(RECEIVE_LOCK_PREFIX).append(key).toString().intern();
-        String userLock = new StringBuilder(RECEIVE_LOCK_PREFIX).append(userId).toString().intern();
+        String receivingLock = Synchronizes.buildReceivingLock(urlKey, application);
+        String userReceiveLock = Synchronizes.buildUserReceiveLock(application, userId);
         synchronized (receivingLock) {
-            synchronized (userLock) {
-                receivingDTO = receivingService.save(key, url, phone, application, userId);
+            synchronized (userReceiveLock) {
+                receivingDTO = receivingService.save(urlKey, url, phone, application, userId);
             }
         }
         return Results.success(receivingDTO);

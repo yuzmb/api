@@ -27,7 +27,7 @@ public interface ReceivingService {
 
     List<ReceivingPieDTO> listReceivingPie(ThirdPartyApplication application, Timestamp gmtCreate);
 
-    ReceivingDTO save(String key, String url, String phone, ThirdPartyApplication application, long userId);
+    ReceivingDTO save(String urlKey, String url, String phone, ThirdPartyApplication application, long userId);
 
     void dispatch(Receiving receiving, long available);
 

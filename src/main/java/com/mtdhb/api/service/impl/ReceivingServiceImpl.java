@@ -181,14 +181,14 @@ public class ReceivingServiceImpl implements ReceivingService {
     }
 
     @Override
-    public ReceivingDTO save(String key, String url, String phone, ThirdPartyApplication application, long userId) {
+    public ReceivingDTO save(String urlKey, String url, String phone, ThirdPartyApplication application, long userId) {
         checkReceiveTime();
         Receiving receiving = null;
-        receiving = receivingRepository.findByUrlKeyAndApplicationAndStatusNot(key, application,
+        receiving = receivingRepository.findByUrlKeyAndApplicationAndStatusNot(urlKey, application,
                 ReceivingStatus.FAILURE);
         if (receiving != null) {
-            throw new BusinessException(ErrorCode.RED_PACKET_EXIST, "key={}, application={}, status={}, receiving={}",
-                    key, application, ReceivingStatus.FAILURE, receiving);
+            throw new BusinessException(ErrorCode.RED_PACKET_EXIST, "urlKey={}, application={}, status={}, receiving={}",
+                    urlKey, application, ReceivingStatus.FAILURE, receiving);
         }
         receiving = receivingRepository.findByApplicationAndStatusAndUserId(application, ReceivingStatus.ING, userId);
         if (receiving != null) {
@@ -201,7 +201,7 @@ public class ReceivingServiceImpl implements ReceivingService {
                     application, userId, available);
         }
         receiving = new Receiving();
-        receiving.setUrlKey(key);
+        receiving.setUrlKey(urlKey);
         receiving.setUrl(url);
         receiving.setPhone(phone);
         receiving.setApplication(application);

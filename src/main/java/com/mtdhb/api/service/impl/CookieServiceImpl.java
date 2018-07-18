@@ -23,7 +23,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.mtdhb.api.constant.CacheNames;
 import com.mtdhb.api.constant.e.ErrorCode;
@@ -45,6 +44,7 @@ import com.mtdhb.api.service.CookieService;
 import com.mtdhb.api.service.NodejsService;
 import com.mtdhb.api.service.UserService;
 import com.mtdhb.api.util.Entities;
+import com.mtdhb.api.util.Synchronizes;
 
 /**
  * @author i@huangdenghe.com
@@ -174,7 +174,6 @@ public class CookieServiceImpl implements CookieService {
         return cookieDTO;
     }
 
-    @Transactional
     @Override
     public void delete(long cookieId, long userId) {
         Cookie cookie = cookieRepository.findByIdAndUserId(cookieId, userId);
@@ -187,18 +186,24 @@ public class CookieServiceImpl implements CookieService {
             throw new BusinessException(ErrorCode.COOKIE_MEITUAN_DELETE_FAILURE,
                     "cookieId={}, application={}, userId={}", cookieId, application, userId);
         }
-        Receiving receiving = receivingRepository.findByApplicationAndStatusAndUserId(application, ReceivingStatus.ING,
-                userId);
-        if (receiving != null) {
-            throw new BusinessException(ErrorCode.COOKIE_DELETE_FAILURE,
-                    "cookieId={}, status={},userId={}, receiving={}", cookieId, ReceivingStatus.ING, userId, receiving);
+        String userReceiveLock = Synchronizes.buildUserReceiveLock(application, userId);
+        // 删除的同时不允许领取
+        synchronized (userReceiveLock) {
+            Receiving receiving = receivingRepository.findByApplicationAndStatusAndUserId(application,
+                    ReceivingStatus.ING, userId);
+            if (receiving != null) {
+                throw new BusinessException(ErrorCode.COOKIE_DELETE_FAILURE,
+                        "cookieId={}, status={},userId={}, receiving={}", cookieId, ReceivingStatus.ING, userId,
+                        receiving);
+            }
+            long available = userService.getAvailable(application, userId);
+            if (available < 5) {
+                throw new BusinessException(ErrorCode.COOKIE_DELETE_EXCEPTION,
+                        "cookieId={}, application={}, userId={}, available={}", cookieId, application, userId,
+                        available);
+            }
+            cookieRepository.delete(cookie);
         }
-        long available = userService.getAvailable(application, userId);
-        if (available < 5) {
-            throw new BusinessException(ErrorCode.COOKIE_DELETE_EXCEPTION,
-                    "cookieId={}, application={}, userId={}, available={}", cookieId, application, userId, available);
-        }
-        cookieRepository.delete(cookie);
     }
 
 }
