@@ -91,7 +91,7 @@ public class Mail {
      * @param subject
      *            主题
      * @param content
-     *            内容，可引用内嵌图片，引用方式：<img src="cid:内嵌图片文件名" />
+     *            内容，可引用内嵌图片，引用方式：{@code <img src="cid:内嵌图片文件名" />}
      * @param images
      *            内嵌图片
      * @param attachments
