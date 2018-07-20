@@ -1,4 +1,4 @@
-package com.mtdhb.api.configuration;
+package com.mtdhb.api.autoconfigure;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -7,12 +7,12 @@ import lombok.Data;
 
 /**
  * @author i@huangdenghe.com
- * @date 2018/06/01
+ * @date 2018/07/20
  */
 @Data
 @Component
 @ConfigurationProperties(prefix = "com.mtdhb.api.nodejs")
-public class NodejsConfiguration {
+public class NodejsProperties {
 
     /**
      * Node.js 服务的 URL

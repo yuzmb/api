@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.mtdhb.api.configuration.NodejsConfiguration;
+import com.mtdhb.api.autoconfigure.NodejsProperties;
 import com.mtdhb.api.constant.e.ThirdPartyApplication;
 import com.mtdhb.api.dto.nodejs.CookieCheckDTO;
 import com.mtdhb.api.dto.nodejs.RedPacketDTO;
@@ -27,11 +27,11 @@ import com.mtdhb.api.util.Connections;
 public class NodejsServiceImpl implements NodejsService {
 
     @Autowired
-    private NodejsConfiguration nodejsConfiguration;
+    private NodejsProperties nodejsProperties;
 
     @Override
     public CookieCheckDTO checkCookie(String cookieValue, ThirdPartyApplication application) throws IOException {
-        String spec = nodejsConfiguration.getUrl() + nodejsConfiguration.getCheckCookie();
+        String spec = nodejsProperties.getUrl() + nodejsProperties.getCheckCookie();
         Map<String, Object> arg = new HashMap<>();
         arg.put("cookie", cookieValue);
         arg.put("application", application.ordinal());
@@ -48,7 +48,7 @@ public class NodejsServiceImpl implements NodejsService {
     @Override
     public ResultDTO<RedPacketDTO> getHongbao(String url, String phone, ThirdPartyApplication application, long limit,
             List<Cookie> cookies) throws IOException {
-        String spec = nodejsConfiguration.getUrl() + nodejsConfiguration.getGetHongbao();
+        String spec = nodejsProperties.getUrl() + nodejsProperties.getGetHongbao();
         Map<String, Object> arg = new HashMap<>();
         arg.put("url", url);
         arg.put("mobile", phone);

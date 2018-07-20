@@ -1,4 +1,4 @@
-package com.mtdhb.api.configuration;
+package com.mtdhb.api.autoconfigure;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -17,10 +17,10 @@ import com.mtdhb.api.constant.CacheNames;
 
 /**
  * @author i@huangdenghe.com
- * @date 2018/05/30
+ * @date 2018/07/20
  */
 @Configuration
-public class CachingConfiguration {
+public class CachingAutoConfiguration {
 
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
@@ -28,7 +28,7 @@ public class CachingConfiguration {
         RedisCacheConfiguration defaultCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
                 // .disableCachingNullValues()
                 .serializeValuesWith(SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
-        cacheConfigurations.put(CacheNames.USER, defaultCacheConfiguration.entryTtl(Duration.ofMinutes(20L)));
+        cacheConfigurations.put(CacheNames.USER, defaultCacheConfiguration.entryTtl(Duration.ofMinutes(30L)));
         cacheConfigurations.put(CacheNames.COOKIE_RANK, defaultCacheConfiguration.entryTtl(Duration.ofMinutes(30L)));
         cacheConfigurations.put(CacheNames.RECEIVING_CAROUSEL,
                 defaultCacheConfiguration.entryTtl(Duration.ofSeconds(60L)));

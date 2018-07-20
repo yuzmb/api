@@ -12,7 +12,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.mtdhb.api.configuration.MailConfiguration;
+import com.mtdhb.api.autoconfigure.MailProperties;
 import com.mtdhb.api.constant.CacheNames;
 import com.mtdhb.api.constant.e.ErrorCode;
 import com.mtdhb.api.constant.e.Purpose;
@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private VerificationRepository verificationRepository;
     @Autowired
-    private MailConfiguration mailConfiguration;
+    private MailProperties mailProperties;
 
     @Override
     public UserDTO loginByMail(String mail, String password) {
@@ -76,7 +76,7 @@ public class UserServiceImpl implements UserService {
         Instant now = Instant.now();
         Timestamp timestamp = Timestamp.from(now);
         Timestamp effectiveTime = Timestamp
-                .from(now.minus(Duration.ofMinutes(mailConfiguration.getRegisterMailEffectiveTime())));
+                .from(now.minus(Duration.ofMinutes(mailProperties.getRegisterMailEffectiveTime())));
         Verification verification = verify(accountDTO.getVerificationCode(), VerificationType.MAIL, Purpose.REGISTER,
                 effectiveTime, timestamp);
         String mail = verification.getObject();
@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void sendRegisterMail(String mail) {
         String lowerCase = mail.toLowerCase();
-        List<String> blacklist = mailConfiguration.getBlacklist();
+        List<String> blacklist = mailProperties.getBlacklist();
         if (blacklist != null && blacklist.stream().anyMatch(domain -> lowerCase.endsWith(domain))) {
             throw new BusinessException(ErrorCode.MAIL_ON_BLACKLIST, "mail={}", mail);
         }
@@ -109,8 +109,8 @@ public class UserServiceImpl implements UserService {
         if (user != null) {
             throw new BusinessException(ErrorCode.MAIL_EXIST, "mail={}, user{}", mail, user);
         }
-        sendMail(mail, Purpose.REGISTER, mailConfiguration.getRegisterMailSubject(),
-                mailConfiguration.getRegisterMailTemplate());
+        sendMail(mail, Purpose.REGISTER, mailProperties.getRegisterMailSubject(),
+                mailProperties.getRegisterMailTemplate());
     }
 
     @Override
@@ -118,7 +118,7 @@ public class UserServiceImpl implements UserService {
         Instant now = Instant.now();
         Timestamp timestamp = Timestamp.from(now);
         Timestamp effectiveTime = Timestamp
-                .from(now.minus(Duration.ofMinutes(mailConfiguration.getResetPasswordMailEffectiveTime())));
+                .from(now.minus(Duration.ofMinutes(mailProperties.getResetPasswordMailEffectiveTime())));
         Verification verification = verify(accountDTO.getVerificationCode(), VerificationType.MAIL,
                 Purpose.RESET_PASSWORD, effectiveTime, timestamp);
         User user = userRepository.findByMail(verification.getObject());
@@ -140,8 +140,8 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new BusinessException(ErrorCode.MAIL_NOT_EXIST, "mail={}, user={}", mail, user);
         }
-        sendMail(mail, Purpose.RESET_PASSWORD, mailConfiguration.getResetPasswordMailSubject(),
-                mailConfiguration.getResetPasswordMailTemplate());
+        sendMail(mail, Purpose.RESET_PASSWORD, mailProperties.getResetPasswordMailSubject(),
+                mailProperties.getResetPasswordMailTemplate());
     }
 
     @Cacheable(cacheNames = CacheNames.USER)

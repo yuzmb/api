@@ -27,6 +27,19 @@ management:
 com:
     mtdhb:
         api:
+            login-interceptor:
+                include-patterns:
+                    - "/**"
+                exclude-patterns:
+                    - /error
+                    - /user/login
+                    - /user/logout
+                    - /user/registerCaptcha
+                    - /user/registerMail
+                    - /user/register
+                    - /user/resetPasswordCaptcha
+                    - /user/resetPasswordMail
+                    - /user/resetPassword
             nodejs:
                 url: http://127.0.0.1:3333
                 check-cookie: /check-cookie
