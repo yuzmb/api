@@ -13,6 +13,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.mtdhb.api.autoconfigure.MailProperties;
+import com.mtdhb.api.autoconfigure.ThirdPartyApplicationProperties;
 import com.mtdhb.api.constant.CacheNames;
 import com.mtdhb.api.constant.e.ErrorCode;
 import com.mtdhb.api.constant.e.Purpose;
@@ -54,6 +55,8 @@ public class UserServiceImpl implements UserService {
     private VerificationRepository verificationRepository;
     @Autowired
     private MailProperties mailProperties;
+    @Autowired
+    private ThirdPartyApplicationProperties thirdPartyApplicationProperties;
 
     @Override
     public UserDTO loginByMail(String mail, String password) {
@@ -163,7 +166,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public NumberDTO getNumber(ThirdPartyApplication application, long userId) {
-        long total = cookieRepository.countByApplicationAndUserId(application, userId) * 5;
+        long total = cookieRepository.countByApplicationAndUserId(application, userId)
+                * thirdPartyApplicationProperties.getAvailables()[application.ordinal()];
         long used = cookieCountRepository.countByApplicationAndUserIdAndGmtCreateGreaterThan(application, userId,
                 Timestamp.valueOf(LocalDate.now().atStartOfDay()));
         NumberDTO numberDTO = new NumberDTO();

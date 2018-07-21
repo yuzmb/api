@@ -2,7 +2,6 @@ package com.mtdhb.api.service.impl;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -28,6 +27,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.mtdhb.api.autoconfigure.ThirdPartyApplicationProperties;
 import com.mtdhb.api.constant.CacheNames;
 import com.mtdhb.api.constant.e.CookieStatus;
 import com.mtdhb.api.constant.e.ErrorCode;
@@ -82,12 +82,10 @@ public class ReceivingServiceImpl implements ReceivingService {
     private CookieMarkRepository cookieMarkRepository;
     @Autowired
     private ReceivingRepository receivingRepository;
-    @Resource(name = "mins")
-    private BigDecimal[] mins;
+    @Autowired
+    private ThirdPartyApplicationProperties thirdPartyApplicationProperties;
     @Resource(name = "queues")
     private List<LinkedBlockingQueue<Cookie>> queues;
-    @Resource(name = "thresholds")
-    private int[] thresholds;
     @Resource(name = "usage")
     private Map<String, Long> usage;
 
@@ -157,7 +155,8 @@ public class ReceivingServiceImpl implements ReceivingService {
         List<ReceivingPieView> receivingPieViews = receivingRepository.findReceivingPieView(application, gmtCreate);
         // 过滤异常数据
         receivingPieViews = receivingPieViews.stream()
-                .filter(receivingPieView -> receivingPieView.getPrice().compareTo(mins[application.ordinal()]) >= 0)
+                .filter(receivingPieView -> receivingPieView.getPrice()
+                        .compareTo(thirdPartyApplicationProperties.getMinimums()[application.ordinal()]) >= 0)
                 .collect(Collectors.toList());
         if (receivingPieViews.size() == 0) {
             return new ArrayList<>();
@@ -187,8 +186,9 @@ public class ReceivingServiceImpl implements ReceivingService {
         receiving = receivingRepository.findByUrlKeyAndApplicationAndStatusNot(urlKey, application,
                 ReceivingStatus.FAILURE);
         if (receiving != null) {
-            throw new BusinessException(ErrorCode.RED_PACKET_EXIST, "urlKey={}, application={}, status={}, receiving={}",
-                    urlKey, application, ReceivingStatus.FAILURE, receiving);
+            throw new BusinessException(ErrorCode.RED_PACKET_EXIST,
+                    "urlKey={}, application={}, status={}, receiving={}", urlKey, application, ReceivingStatus.FAILURE,
+                    receiving);
         }
         receiving = receivingRepository.findByApplicationAndStatusAndUserId(application, ReceivingStatus.ING, userId);
         if (receiving != null) {
@@ -220,10 +220,11 @@ public class ReceivingServiceImpl implements ReceivingService {
     public void dispatch(Receiving receiving, long available) {
         ThirdPartyApplication application = receiving.getApplication();
         LinkedBlockingQueue<Cookie> queue = queues.get(application.ordinal());
-        int threshold = thresholds[application.ordinal()];
+        int total = thirdPartyApplicationProperties.getTotals()[application.ordinal()];
         int size = queue.size();
         logger.info("queue#size={}", size);
-        if (size < threshold) {
+        // 小于每个链接的红包个数要重新加载
+        if (size < total) {
             cookieService.load(application);
             size = queue.size();
         }
@@ -231,8 +232,7 @@ public class ReceivingServiceImpl implements ReceivingService {
             saveFailedReceiving(receiving, ErrorCode.COOKIE_INSUFFICIENT.getMessage(), Timestamp.from(Instant.now()));
             return;
         }
-        // TODO 配置
-        size = Math.min(size, 30);
+        size = Math.min(size, total << 1);
         List<Cookie> cookies = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             Cookie cookie = queue.poll();
@@ -279,9 +279,9 @@ public class ReceivingServiceImpl implements ReceivingService {
                     // 已使用
                     useCookieCount.incrementAndGet();
                     long n = usage.remove(openId) + 1;
-                    if (n < 5) {
+                    if (n < thirdPartyApplicationProperties.getAvailables()[application.ordinal()]) {
                         usage.put(openId, n);
-                        // 未达到 5 次领取则放回队列
+                        // 未达到每人每天可以领红包的次数则放回队列
                         queue.offer(cookie);
                     }
                     CookieCount count = new CookieCount();
@@ -302,7 +302,7 @@ public class ReceivingServiceImpl implements ReceivingService {
                     cookieMark.setGmtCreate(timestamp);
                     cookieMarks.add(cookieMark);
                 } else if (status == CookieStatus.LIMIT.ordinal()) {
-                    // 未达到5次领取就失效 cookie 处理
+                    // 未达到每人每天可以领红包的次数就失效 cookie 处理
                     CookieMark cookieMark = new CookieMark();
                     cookieMark.setApplication(application);
                     cookieMark.setStatus(CookieStatus.LIMIT);

@@ -1,6 +1,5 @@
 package com.mtdhb.api;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -81,18 +80,6 @@ public class Application {
     public AtomicLong[] endpoints() {
         return Stream.of(ThirdPartyApplication.values()).map(application -> new AtomicLong())
                 .toArray(AtomicLong[]::new);
-    }
-
-    @Bean
-    public int[] thresholds() {
-        // 美团拼手气红包最多 20 个，饿了么 10 个
-        return new int[] { 20, 10 };
-    }
-
-    @Bean
-    public BigDecimal[] mins() {
-        // 美团拼手气红包的手气最佳红包的最小金额 3.6，饿了么 4.6
-        return new BigDecimal[] { new BigDecimal("3.3"), new BigDecimal("4.6") };
     }
 
     @Autowired

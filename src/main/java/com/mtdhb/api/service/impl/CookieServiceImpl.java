@@ -24,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
+import com.mtdhb.api.autoconfigure.ThirdPartyApplicationProperties;
 import com.mtdhb.api.constant.CacheNames;
 import com.mtdhb.api.constant.e.ErrorCode;
 import com.mtdhb.api.constant.e.HttpService;
@@ -67,12 +68,12 @@ public class CookieServiceImpl implements CookieService {
     private CookieCountRepository cookieCountRepository;
     @Autowired
     private ReceivingRepository receivingRepository;
+    @Autowired
+    private ThirdPartyApplicationProperties thirdPartyApplicationProperties;
     @Resource(name = "endpoints")
     private AtomicLong[] endpoints;
     @Resource(name = "queues")
     private List<LinkedBlockingQueue<Cookie>> queues;
-    @Resource(name = "thresholds")
-    private int[] thresholds;
     @Resource(name = "usage")
     private Map<String, Long> usage;
 
@@ -109,9 +110,9 @@ public class CookieServiceImpl implements CookieService {
     public void load(ThirdPartyApplication application) {
         logger.info("{} queue loading...", application);
         LinkedBlockingQueue<Cookie> queue = queues.get(application.ordinal());
-        int threshold = thresholds[application.ordinal()];
-        // 小于阈值要重新加载
-        while (queue.size() < threshold) {
+        int total = thirdPartyApplicationProperties.getTotals()[application.ordinal()];
+        // 小于每个链接的红包个数要重新加载
+        while (queue.size() < total) {
             AtomicLong endpoint = endpoints[application.ordinal()];
             long lower = endpoint.get();
             logger.info("application={}, lower={}", application, lower);
@@ -137,7 +138,7 @@ public class CookieServiceImpl implements CookieService {
                 if (count == null) {
                     usage.put(openId, 0L);
                     queue.offer(cookie);
-                } else if (count < 5L) {
+                } else if (count < thirdPartyApplicationProperties.getAvailables()[application.ordinal()]) {
                     queue.offer(cookie);
                 } else {
                     usage.remove(openId);
@@ -197,7 +198,7 @@ public class CookieServiceImpl implements CookieService {
                         receiving);
             }
             long available = userService.getAvailable(application, userId);
-            if (available < 5) {
+            if (available < thirdPartyApplicationProperties.getAvailables()[application.ordinal()]) {
                 throw new BusinessException(ErrorCode.COOKIE_DELETE_EXCEPTION,
                         "cookieId={}, application={}, userId={}, available={}", cookieId, application, userId,
                         available);
