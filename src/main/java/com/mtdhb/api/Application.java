@@ -29,9 +29,9 @@ import com.mtdhb.api.service.AsyncService;
  * @author i@huangdenghe.com
  * @date 2017/11/30
  */
-@SpringBootApplication
-@EnableScheduling
 @EnableCaching
+@EnableScheduling
+@SpringBootApplication
 public class Application {
 
     public static void main(String[] args) throws Exception {

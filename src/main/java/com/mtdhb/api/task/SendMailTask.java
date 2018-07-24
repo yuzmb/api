@@ -1,10 +1,5 @@
 package com.mtdhb.api.task;
 
-import java.lang.invoke.MethodHandles;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.mtdhb.api.util.Mail;
 
 /**
@@ -12,8 +7,6 @@ import com.mtdhb.api.util.Mail;
  * @date 2018/03/26
  */
 public class SendMailTask implements Runnable {
-
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private String to;
     private String subject;
@@ -28,9 +21,7 @@ public class SendMailTask implements Runnable {
 
     @Override
     public void run() {
-        logger.info("SendMailTask#run starting...");
         Mail.getInstance().send(to, subject, content);
-        logger.info("SendMailTask#run end");
     }
 
 }

@@ -9,9 +9,10 @@ import lombok.Data;
  * @author i@huangdenghe.com
  * @date 2018/07/20
  */
-@Data
+
 @Component
 @ConfigurationProperties(prefix = "com.mtdhb.api.nodejs")
+@Data
 public class NodejsProperties {
 
     /**

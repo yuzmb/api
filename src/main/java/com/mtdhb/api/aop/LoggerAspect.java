@@ -1,6 +1,5 @@
 package com.mtdhb.api.aop;
 
-import java.lang.invoke.MethodHandles;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -8,19 +7,18 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author i@huangdenghe.com
  * @date 2018/03/10
  */
-@Component
 @Aspect
+@Component
+@Slf4j
 public class LoggerAspect {
-
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Pointcut("execution(* com.mtdhb.api.web.home.*.*(..))")
     private void controller() {
@@ -46,9 +44,9 @@ public class LoggerAspect {
         Object[] args = pjp.getArgs();
         Optional<String> optional = Stream.of(args).map(ojbect -> ", {}")
                 .reduce((accumulator, currentValue) -> accumulator += currentValue);
-        logger.info(invoke + "(" + optional.orElse("  ").substring(2) + ")", args);
+        log.info(invoke + "(" + optional.orElse("  ").substring(2) + ")", args);
         Object object = pjp.proceed();
-        logger.info(invoke + " return {}", object);
+        log.info(invoke + " return {}", object);
         return object;
     }
 

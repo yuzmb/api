@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -23,8 +22,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 由于免费企业邮箱有发送数量和频率的限制，不足以支撑我们网站的邮件发送； 而我们又买不起收费的，所以我们采用配置多个免费企业邮箱方式解决。
@@ -32,9 +30,8 @@ import org.slf4j.LoggerFactory;
  * @author i@huangdenghe.com
  * @date 2018/03/17
  */
+@Slf4j
 public class Mail {
-
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private ArrayList<Properties> propertiesList = new ArrayList<>();
     private ArrayList<Session> sessionList = new ArrayList<>();
@@ -47,7 +44,7 @@ public class Mail {
             if (in == null) {
                 break;
             }
-            logger.info("i={}", i);
+            log.info("i={}", i);
             try (Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8);) {
                 Properties properties = new Properties();
                 properties.load(reader);
@@ -56,12 +53,12 @@ public class Mail {
                 propertiesList.add(properties);
                 sessionList.add(session);
             } catch (Exception e) {
-                logger.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
                 break;
             }
         }
         size = propertiesList.size();
-        logger.info("size={}", size);
+        log.info("size={}", size);
     }
 
     public static Mail getInstance() {
@@ -103,9 +100,9 @@ public class Mail {
         // 以轮询方式实现负载均衡
         int index = position.updateAndGet(p -> p + 1 < size ? p + 1 : 0);
         // int index = 0;
-        logger.info("index={}", index);
+        log.info("index={}", index);
         Properties properties = propertiesList.get(index);
-        logger.info("properties={}", properties);
+        log.info("properties={}", properties);
         Session session = sessionList.get(index);
         String personal = properties.getProperty("com.mtdhb.mail.personal");
         String user = properties.getProperty("com.mtdhb.mail.user");
@@ -164,7 +161,7 @@ public class Mail {
             transport.close();
             return true;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e,
+            log.error(e.getMessage(), e,
                     "index={}, properties={}, to={}, cc={}, bcc={}, subject={}, content{}, images={}, attachments={}",
                     index, properties, to, cc, bcc, subject, content, images, attachments);
         }

@@ -11,9 +11,9 @@ import lombok.Data;
  * @author i@huangdenghe.com
  * @date 2018/07/19
  */
-@Data
 @Component
 @ConfigurationProperties(prefix = "com.mtdhb.api.third-party-application")
+@Data
 public class ThirdPartyApplicationProperties {
 
     /**

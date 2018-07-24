@@ -1,12 +1,8 @@
 package com.mtdhb.api.web;
 
-import java.lang.invoke.MethodHandles;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -17,14 +13,16 @@ import com.mtdhb.api.dto.UserDTO;
 import com.mtdhb.api.exception.BusinessException;
 import com.mtdhb.api.service.UserService;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author i@huangdenghe.com
  * @date 2018/03/03
  */
 @Component
+@Slf4j
 public class LoginInterceptor extends HandlerInterceptorAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     @Autowired
     private UserService userService;
 
@@ -34,7 +32,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
         String method = request.getMethod();
         String uri = request.getRequestURI();
         String userToken = request.getHeader(CustomHttpHeaders.X_USER_TOKEN);
-        logger.info("method={}, uri={}, userToken={}", method, uri, userToken);
+        log.info("method={}, uri={}, userToken={}", method, uri, userToken);
         if (userToken == null) {
             throw new BusinessException(ErrorCode.AUTHENTICATION_EXCEPTION, "method={}, uri={}, userToken={}", method,
                     uri, userToken);

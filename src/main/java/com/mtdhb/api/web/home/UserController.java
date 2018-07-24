@@ -1,7 +1,6 @@
 package com.mtdhb.api.web.home;
 
 import java.io.IOException;
-import java.lang.invoke.MethodHandles;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -14,8 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,15 +39,16 @@ import com.mtdhb.api.util.Results;
 import com.mtdhb.api.util.Synchronizes;
 import com.mtdhb.api.web.RequestContextHolder;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author i@huangdenghe.com
  * @date 2017/12/02
  */
 @RequestMapping("/user")
 @RestController
+@Slf4j
 public class UserController {
-
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private static final Pattern PATTERN = Pattern.compile("^Cookie:.+", Pattern.CASE_INSENSITIVE);
 
@@ -169,7 +167,7 @@ public class UserController {
             }
             spec = new URL(url);
         } catch (Exception e) {
-            logger.warn("url={}", url, e);
+            log.warn("url={}", url, e);
             throw new BusinessException(ErrorCode.URL_ERROR, "url={}", url);
         }
         if (url.startsWith("https://h5.ele.me/hongbao/")) {
@@ -226,7 +224,7 @@ public class UserController {
     private void checkCaptcha(String captcha, String sessionKey, HttpSession session) {
         String sessionCaptcha = (String) session.getAttribute(sessionKey);
         session.removeAttribute(sessionKey);
-        logger.info("{} captcha={}, sessionCaptcha={}", sessionKey, captcha, sessionCaptcha);
+        log.info("{} captcha={}, sessionCaptcha={}", sessionKey, captcha, sessionCaptcha);
         if (!captcha.equalsIgnoreCase(sessionCaptcha)) {
             throw new BusinessException(ErrorCode.CAPTCHA_ERROR, "{} captcha={}, sessionCaptcha={}", sessionKey,
                     captcha, sessionCaptcha);
@@ -236,7 +234,7 @@ public class UserController {
     private void writeCaptcha(String sessionKey, HttpSession session, HttpServletResponse response) throws IOException {
         Captcha captcha = new Captcha();
         String code = captcha.getCode();
-        logger.info("{} captcha={}", sessionKey, code);
+        log.info("{} captcha={}", sessionKey, code);
         session.setAttribute(sessionKey, code);
         response.setDateHeader(HttpHeaders.EXPIRES, -1);
         response.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache");

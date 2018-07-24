@@ -1,6 +1,5 @@
 package com.mtdhb.api.service.impl;
 
-import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -9,8 +8,6 @@ import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,14 +23,15 @@ import com.mtdhb.api.task.ReceiveTask;
 import com.mtdhb.api.task.SendMailTask;
 import com.mtdhb.api.task.ShutdownTask;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author i@huangdenghe.com
  * @date 2018/06/30
  */
 @Service
+@Slf4j
 public class AsyncServiceImpl implements AsyncService {
-
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
     private ReceivingService receivingService;
@@ -83,14 +81,14 @@ public class AsyncServiceImpl implements AsyncService {
         shutdownThreadPool.shutdown();
         try {
             boolean isTerminated = shutdownThreadPool.awaitTermination(timeout, unit);
-            logger.info("{} shutdown isTerminated={}", ThreadPoolNames.SHUTDOWN_THREAD_POOL, isTerminated);
+            log.info("{} shutdown isTerminated={}", ThreadPoolNames.SHUTDOWN_THREAD_POOL, isTerminated);
             if (!isTerminated) {
                 shutdownThreadPool.shutdownNow();
                 isTerminated = shutdownThreadPool.awaitTermination(timeout, unit);
-                logger.info("{} shutdownNow isTerminated={}", ThreadPoolNames.SHUTDOWN_THREAD_POOL, isTerminated);
+                log.info("{} shutdownNow isTerminated={}", ThreadPoolNames.SHUTDOWN_THREAD_POOL, isTerminated);
             }
         } catch (InterruptedException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 

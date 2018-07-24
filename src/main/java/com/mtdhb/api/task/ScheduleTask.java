@@ -1,6 +1,5 @@
 package com.mtdhb.api.task;
 
-import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -9,8 +8,6 @@ import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -20,14 +17,16 @@ import com.mtdhb.api.entity.Cookie;
 import com.mtdhb.api.service.CookieCountService;
 import com.mtdhb.api.service.CookieService;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author i@huangdenghe.com
  * @date 2018/07/14
  */
 @Component
+@Slf4j
 public class ScheduleTask {
 
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     @Autowired
     private CookieService cookieService;
     @Autowired
@@ -41,7 +40,7 @@ public class ScheduleTask {
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void reload() {
-        logger.info("Reload starting...");
+        log.info("Reload starting...");
         usage.clear();
         Stream.of(ThirdPartyApplication.values()).forEach(application -> {
             queues.get(application.ordinal()).clear();
@@ -52,7 +51,7 @@ public class ScheduleTask {
 
     @Scheduled(cron = "0 55 23 * * ?")
     public void clear() {
-        logger.info("Clear starting...");
+        log.info("Clear starting...");
         cookieCountService.deleteAll();
     }
 

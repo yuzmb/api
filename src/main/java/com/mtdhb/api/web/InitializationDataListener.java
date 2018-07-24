@@ -1,11 +1,8 @@
 package com.mtdhb.api.web;
 
-import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -19,14 +16,15 @@ import com.mtdhb.api.service.AsyncService;
 import com.mtdhb.api.service.CookieService;
 import com.mtdhb.api.service.UserService;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author i@huangdenghe.com
  * @date 2018/06/05
  */
 @Component
+@Slf4j
 public class InitializationDataListener implements ApplicationListener<ContextRefreshedEvent> {
-
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
     private AsyncService asyncService;
@@ -41,11 +39,11 @@ public class InitializationDataListener implements ApplicationListener<ContextRe
     public void onApplicationEvent(ContextRefreshedEvent event) {
         // root of context hierarchy
         if (event.getApplicationContext().getParent() == null) {
-            logger.info("Initializing custom");
+            log.info("Initializing custom");
             Stream.of(ThirdPartyApplication.values()).forEach(application -> cookieService.load(application));
             // 执行未完成的领取任务
             List<Receiving> receivings = receivingRepository.findByStatus(ReceivingStatus.ING);
-            logger.info("receivings#size={}", receivings.size());
+            log.info("receivings#size={}", receivings.size());
             receivings.stream().forEach(receiving -> {
                 long available = userService.getAvailable(receiving.getApplication(), receiving.getUserId());
                 asyncService.dispatch(receiving, available);

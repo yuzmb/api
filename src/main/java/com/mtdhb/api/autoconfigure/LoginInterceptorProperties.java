@@ -10,8 +10,8 @@ import lombok.Data;
  * @author i@huangdenghe.com
  * @date 2018/07/20
  */
-@Data
 @ConfigurationProperties(prefix = "com.mtdhb.api.login-interceptor")
+@Data
 public class LoginInterceptorProperties {
 
     private List<String> includePatterns;

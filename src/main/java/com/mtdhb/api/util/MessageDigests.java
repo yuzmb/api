@@ -3,7 +3,6 @@ package com.mtdhb.api.util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
@@ -11,18 +10,16 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.mtdhb.api.constant.Constants;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author i@huangdenghe.com
  * @date 2017/12/16
  */
+@Slf4j
 public class MessageDigests {
-
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     public static final String MD5 = "MD5";
     /**
@@ -37,7 +34,7 @@ public class MessageDigests {
         try {
             return digest(new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8)), algorithm);
         } catch (NoSuchAlgorithmException | IOException e) {
-            logger.error("text={},algorithm={}", text, algorithm, e);
+            log.error("text={},algorithm={}", text, algorithm, e);
         }
         return null;
     }

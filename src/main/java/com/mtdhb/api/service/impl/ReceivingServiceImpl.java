@@ -1,7 +1,6 @@
 package com.mtdhb.api.service.impl;
 
 import java.io.IOException;
-import java.lang.invoke.MethodHandles;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -17,8 +16,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -59,14 +56,15 @@ import com.mtdhb.api.service.ReceivingService;
 import com.mtdhb.api.service.UserService;
 import com.mtdhb.api.util.Entities;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author i@huangdenghe.com
  * @date 2018/04/17
  */
 @Service
+@Slf4j
 public class ReceivingServiceImpl implements ReceivingService {
-
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
     private AsyncService asyncService;
@@ -222,7 +220,7 @@ public class ReceivingServiceImpl implements ReceivingService {
         LinkedBlockingQueue<Cookie> queue = queues.get(application.ordinal());
         int total = thirdPartyApplicationProperties.getTotals()[application.ordinal()];
         int size = queue.size();
-        logger.info("queue#size={}", size);
+        log.info("queue#size={}", size);
         // 小于每个链接的红包个数要重新加载
         if (size < total) {
             cookieService.load(application);
@@ -341,14 +339,14 @@ public class ReceivingServiceImpl implements ReceivingService {
             receiving.setGmtModified(timestamp);
             receivingRepository.save(receiving);
         } catch (IOException e) {
-            logger.error("receiving={}, cookies={}", receiving, cookies, e);
+            log.error("receiving={}, cookies={}", receiving, cookies, e);
             // TODO 现在暂时不限制领取，IO 异常 cookie 直接放回队列
             cookies.stream().forEach(cookie -> {
                 queue.offer(cookie);
             });
             saveFailedReceiving(receiving, e.getMessage(), timestamp);
         } catch (Exception e) {
-            logger.error("receiving={}, cookies={}", receiving, cookies, e);
+            log.error("receiving={}, cookies={}", receiving, cookies, e);
             saveFailedReceiving(receiving, e.getMessage(), timestamp);
         }
     }
@@ -360,7 +358,7 @@ public class ReceivingServiceImpl implements ReceivingService {
         LocalDateTime today = LocalDate.now().atStartOfDay();
         LocalDateTime tomorrow = today.plusDays(1);
         ZoneOffset defaultZoneOffset = ZoneOffset.ofHours(8);
-        logger.info("now={}, today={}, tomorrow={}, defaultZoneOffset={}", now, today, tomorrow, defaultZoneOffset);
+        log.info("now={}, today={}, tomorrow={}, defaultZoneOffset={}", now, today, tomorrow, defaultZoneOffset);
         long todayEpochMilli = today.toInstant(defaultZoneOffset).toEpochMilli();
         long tomorrowEpochMilli = tomorrow.toInstant(defaultZoneOffset).toEpochMilli();
         // TODO 配置

@@ -1,7 +1,6 @@
 package com.mtdhb.api.service.impl;
 
 import java.io.IOException;
-import java.lang.invoke.MethodHandles;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -14,8 +13,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -47,16 +44,17 @@ import com.mtdhb.api.service.UserService;
 import com.mtdhb.api.util.Entities;
 import com.mtdhb.api.util.Synchronizes;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author i@huangdenghe.com
  * @date 2018/04/15
  */
 @Service
+@Slf4j
 public class CookieServiceImpl implements CookieService {
 
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-    public static final int CHUNK_SIZE = 1024;
+    private static final int CHUNK_SIZE = 1024;
 
     @Autowired
     private NodejsService nodejsService;
@@ -108,28 +106,28 @@ public class CookieServiceImpl implements CookieService {
 
     @Override
     public void load(ThirdPartyApplication application) {
-        logger.info("{} queue loading...", application);
+        log.info("{} queue loading...", application);
         LinkedBlockingQueue<Cookie> queue = queues.get(application.ordinal());
         int total = thirdPartyApplicationProperties.getTotals()[application.ordinal()];
         // 小于每个链接的红包个数要重新加载
         while (queue.size() < total) {
             AtomicLong endpoint = endpoints[application.ordinal()];
             long lower = endpoint.get();
-            logger.info("application={}, lower={}", application, lower);
+            log.info("application={}, lower={}", application, lower);
             Slice<Cookie> cookies = cookieRepository.findByApplicationAndIdGreaterThan(application, lower,
                     PageRequest.of(0, CHUNK_SIZE));
             int numberOfElements = cookies.getNumberOfElements();
-            logger.info("cookies#size={}", numberOfElements);
+            log.info("cookies#size={}", numberOfElements);
             if (numberOfElements < 1) {
                 return;
             }
             Cookie last = cookies.getContent().get(numberOfElements - 1);
             long upper = last.getId();
-            logger.info("upper={}", upper);
+            log.info("upper={}", upper);
             Timestamp today = Timestamp.valueOf(LocalDate.now().atStartOfDay());
             List<CookieCountView> cookieCountViews = cookieCountRepository.findCookieCountView(application, today,
                     lower, upper);
-            logger.info("cookieCountViews#size={}", cookieCountViews.size());
+            log.info("cookieCountViews#size={}", cookieCountViews.size());
             cookieCountViews.stream().forEach(
                     cookieCountView -> usage.putIfAbsent(cookieCountView.getOpenId(), cookieCountView.getCount()));
             cookies.forEach(cookie -> {
@@ -147,7 +145,7 @@ public class CookieServiceImpl implements CookieService {
             // 重设端点值
             endpoint.set(upper + 1);
         }
-        logger.info("application={}, usage#size={}, queues#size={}", application, usage.size(), queue.size());
+        log.info("application={}, usage#size={}, queues#size={}", application, usage.size(), queue.size());
     }
 
     @Override

@@ -10,22 +10,19 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.invoke.MethodHandles;
 import java.text.AttributedCharacterIterator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author i@huangdenghe.com
  * @date 2018/03/03
  */
+@Slf4j
 public class Captcha {
-
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private static final String CHARACTER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
@@ -35,7 +32,7 @@ public class Captcha {
         try (InputStream in = Captcha.class.getClassLoader().getResourceAsStream("arial.ttf")) {
             ARIAL = Font.createFont(Font.TRUETYPE_FONT, in);
         } catch (FontFormatException | IOException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -103,7 +100,7 @@ public class Captcha {
         Graphics g = image.getGraphics();
         Color defaultColor = g.getColor();
         Font defaultFont = g.getFont();
-        logger.debug("defaultFont={}", defaultFont);
+        log.debug("defaultFont={}", defaultFont);
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, image.getWidth(), image.getHeight());
         Map<AttributedCharacterIterator.Attribute, Object> attributes = new HashMap<AttributedCharacterIterator.Attribute, Object>();
@@ -115,7 +112,7 @@ public class Captcha {
             attributes.put(TextAttribute.TRANSFORM,
                     AffineTransform.getRotateInstance((random.nextInt(2) == 0 ? -1 : 1) * Math.PI / 12));
             g.setFont(ARIAL.deriveFont(attributes));
-            logger.debug("currentFont={}", g.getFont());
+            log.debug("currentFont={}", g.getFont());
             g.setColor(new Color(75, 131, 8));
             char c = CHARACTER.charAt(random.nextInt(CHARACTER.length()));
             code.append(c);

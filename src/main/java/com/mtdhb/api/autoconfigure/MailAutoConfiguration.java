@@ -2,17 +2,16 @@ package com.mtdhb.api.autoconfigure;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 
 import javax.annotation.PostConstruct;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import com.mtdhb.api.util.IOStreams;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author i@huangdenghe.com
@@ -20,9 +19,8 @@ import com.mtdhb.api.util.IOStreams;
  */
 @Configuration
 @EnableConfigurationProperties(MailProperties.class)
+@Slf4j
 public class MailAutoConfiguration {
-
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final MailProperties properties;
 
@@ -45,7 +43,7 @@ public class MailAutoConfiguration {
         try (InputStream in = MailAutoConfiguration.class.getClassLoader().getResourceAsStream(path)) {
             template = new String(IOStreams.readAllBytes(in), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            logger.error("path={}", path, e);
+            log.error("path={}", path, e);
         }
         return template;
     }

@@ -25,7 +25,6 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        System.out.println(this.loginInterceptorProperties);
         registry.addInterceptor(this.loginInterceptor)
                 .addPathPatterns(this.loginInterceptorProperties.getIncludePatterns())
                 .excludePathPatterns(this.loginInterceptorProperties.getExcludePatterns());

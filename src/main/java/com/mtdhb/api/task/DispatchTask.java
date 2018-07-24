@@ -1,10 +1,5 @@
 package com.mtdhb.api.task;
 
-import java.lang.invoke.MethodHandles;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.mtdhb.api.entity.Receiving;
 import com.mtdhb.api.service.ReceivingService;
 
@@ -13,8 +8,6 @@ import com.mtdhb.api.service.ReceivingService;
  * @date 2018/07/14
  */
 public class DispatchTask implements Runnable {
-
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private ReceivingService receivingService;
     private Receiving receiving;
@@ -28,9 +21,7 @@ public class DispatchTask implements Runnable {
 
     @Override
     public void run() {
-        logger.info("DispatchTask#run starting...");
         receivingService.dispatch(receiving, available);
-        logger.info("DispatchTask#run end");
     }
 
 }
