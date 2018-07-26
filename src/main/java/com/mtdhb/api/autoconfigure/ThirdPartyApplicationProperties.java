@@ -27,6 +27,6 @@ public class ThirdPartyApplicationProperties {
     /**
      * 每人每天可以领红包的次数
      */
-    private long[] availables;
+    private long[] dailies;
 
 }

@@ -33,16 +33,16 @@ public interface ReceivingRepository extends CrudRepository<Receiving, Long> {
 
     List<Receiving> findByStatus(ReceivingStatus status);
 
-    @Query(value = "select u.mail as mail, r.application as application, r.price as price, r.gmtModified as gmtModified"
+    @Query("select u.mail as mail, r.application as application, r.price as price, r.gmtModified as gmtModified"
             + " from Receiving r, User u where r.userId=u.id and r.status=1 and r.price>0")
     Slice<ReceivingCarouselView> findReceivingCarouselView(Pageable pageable);
 
-    @Query(value = "select date_format(r.gmtCreate, '%Y/%m/%d') as date, sum(r.price) as totalPrice, count(*) as count "
+    @Query("select date_format(r.gmtCreate, '%Y/%m/%d') as date, sum(r.price) as totalPrice, count(*) as count "
             + "from Receiving r where r.status=1 and r.application=?1 and r.price>0 and r.gmtCreate>?2 "
             + "group by date_format(r.gmtCreate, '%Y/%m/%d') order by date_format(r.gmtCreate, '%Y/%m/%d') desc")
     List<ReceivingTrendView> findReceivingTrendView(ThirdPartyApplication application, Timestamp gmtCreate);
 
-    @Query(value = "select r.price as price, count(*) as count "
+    @Query("select r.price as price, count(*) as count "
             + "from Receiving r where r.status=1 and r.application=?1 and r.price>0 and r.gmtCreate>?2 "
             + "group by r.price order by r.price")
     List<ReceivingPieView> findReceivingPieView(ThirdPartyApplication application, Timestamp gmtCreate);

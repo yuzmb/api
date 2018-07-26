@@ -12,6 +12,6 @@ import lombok.Data;
 public class RedPacketDTO {
 
     private RedPacketResultDTO result;
-    private List<CookieStatusDTO> cookies;
+    private List<CookieUseStatusDTO> cookies;
     
 }

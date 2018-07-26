@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
@@ -26,9 +25,7 @@ public interface CookieRepository extends CrudRepository<Cookie, Long> {
 
     Cookie findByIdAndUserId(long id, long userId);
 
-    Slice<Cookie> findByApplicationAndIdGreaterThan(ThirdPartyApplication application, long lower, Pageable pageable);
-
-    @Query(value = "select c.userId as userId, count(*) as count from Cookie c where c.application=?1 group by c.userId order by count(*) desc, max(c.gmtCreate) asc")
+    @Query("select c.userId as userId, count(*) as count from Cookie c where c.application=?1 group by c.userId order by count(*) desc, max(c.gmtCreate)")
     Page<CookieRankView> findCookieRankViewByApplication(ThirdPartyApplication application, Pageable pageable);
 
 }

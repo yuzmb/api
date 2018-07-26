@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * @author i@huangdenghe.com
  * @date 2018/03/14
  */
-public enum CookieStatus {
+public enum CookieUseStatus {
 
     SUCCESS, USED, INVALID, LIMIT;
 

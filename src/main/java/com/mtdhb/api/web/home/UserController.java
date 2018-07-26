@@ -15,6 +15,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -216,7 +217,10 @@ public class UserController {
     }
 
     private String getParmeter(String query, String name) {
-        Optional<String> optional = Stream.of(query.split("&")).filter(keyValue -> keyValue.trim().startsWith(name))
+        if (StringUtils.isEmpty(query) || StringUtils.isEmpty(name)) {
+            return null;
+        }
+        Optional<String> optional = Stream.of(query.split("&")).filter(keyValue -> keyValue.startsWith(name + "="))
                 .map(keyValue -> keyValue.split("=")[1]).findFirst();
         return optional.orElse(null);
     }

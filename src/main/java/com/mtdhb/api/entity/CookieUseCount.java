@@ -8,7 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import com.mtdhb.api.constant.e.CookieStatus;
+import com.mtdhb.api.constant.e.CookieUseStatus;
 import com.mtdhb.api.constant.e.ThirdPartyApplication;
 
 import lombok.Data;
@@ -19,17 +19,20 @@ import lombok.Data;
  */
 @Data
 @Entity
-public class CookieMark {
+public class CookieUseCount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Enumerated
-    private ThirdPartyApplication application;
+    private CookieUseStatus status;
     @Enumerated
-    private CookieStatus status;
-    private Long userId;
+    private ThirdPartyApplication application;
+    private String openId;
     private Long cookieId;
+    private Long cookieUserId;
+    private Long receivingId;
+    private Long receivingUserId;
     private Timestamp gmtCreate;
     private Timestamp gmtModified;
 

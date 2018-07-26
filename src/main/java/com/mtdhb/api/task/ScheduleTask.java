@@ -12,10 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.mtdhb.api.constant.e.CookieUseStatus;
 import com.mtdhb.api.constant.e.ThirdPartyApplication;
 import com.mtdhb.api.entity.Cookie;
-import com.mtdhb.api.service.CookieCountService;
 import com.mtdhb.api.service.CookieService;
+import com.mtdhb.api.service.CookieUseCountService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +31,7 @@ public class ScheduleTask {
     @Autowired
     private CookieService cookieService;
     @Autowired
-    private CookieCountService cookieCountService;
+    private CookieUseCountService cookieUseCountService;
     @Resource(name = "usage")
     private Map<Long, Long> usage;
     @Resource(name = "queues")
@@ -44,7 +45,7 @@ public class ScheduleTask {
         usage.clear();
         Stream.of(ThirdPartyApplication.values()).forEach(application -> {
             queues.get(application.ordinal()).clear();
-            endpoints[application.ordinal()].set(0L);
+            endpoints[application.ordinal()].set(Long.MAX_VALUE);
             cookieService.load(application);
         });
     }
@@ -52,7 +53,7 @@ public class ScheduleTask {
     @Scheduled(cron = "0 55 23 * * ?")
     public void clear() {
         log.info("Clear starting...");
-        cookieCountService.deleteAll();
+        cookieUseCountService.deleteByStatus(CookieUseStatus.SUCCESS);
     }
 
 }

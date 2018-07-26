@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS `cookie`;
 
 CREATE TABLE `cookie` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `value` varchar(4096) DEFAULT NULL,
+  `value` varchar(4096) NOT NULL,
   `service` tinyint(1) NOT NULL,
   `application` tinyint(1) NOT NULL,
   `open_id` varchar(64) NOT NULL,
@@ -16,34 +16,26 @@ CREATE TABLE `cookie` (
   KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `cookie_count`;
+DROP TABLE IF EXISTS `cookie_use_count`;
 
-CREATE TABLE `cookie_count` (
+CREATE TABLE `cookie_use_count` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `status` tinyint(1) NOT NULL,
   `application` tinyint(1) NOT NULL,
   `open_id` varchar(64) NOT NULL,
-  `user_id` bigint(20) NOT NULL,
   `cookie_id` bigint(20) NOT NULL,
+  `cookie_user_id` bigint(20) NOT NULL,
   `receiving_id` bigint(20) NOT NULL,
+  `receiving_user_id` bigint(20) NOT NULL,
   `gmt_create` datetime NOT NULL,
   `gmt_modified` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_user_id` (`user_id`)
+  KEY `idx_open_id` (`open_id`),
+  KEY `idx_cookie_id` (`cookie_id`),
+  KEY `idx_cookie_user_id` (`cookie_user_id`),
+  KEY `idx_receiving_id` (`receiving_id`),
+  KEY `idx_receiving_user_id` (`receiving_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-DROP TABLE IF EXISTS `cookie_mark`;
-
-CREATE TABLE `cookie_mark` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `application` tinyint(1) NOT NULL,
-  `status` tinyint(1) NOT NULL,
-  `user_id` bigint(20) NOT NULL,
-  `cookie_id` bigint(20) NOT NULL,
-  `gmt_create` datetime NOT NULL,
-  `gmt_modified` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 
 DROP TABLE IF EXISTS `receiving`;
 

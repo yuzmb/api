@@ -7,7 +7,7 @@ import lombok.Data;
  * @date 2018/03/13
  */
 @Data
-public class CookieStatusDTO {
+public class CookieUseStatusDTO {
 
     private Long id;
     private Integer status;

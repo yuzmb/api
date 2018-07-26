@@ -78,7 +78,7 @@ public class Application {
 
     @Bean
     public AtomicLong[] endpoints() {
-        return Stream.of(ThirdPartyApplication.values()).map(application -> new AtomicLong())
+        return Stream.of(ThirdPartyApplication.values()).map(application -> new AtomicLong(Long.MAX_VALUE))
                 .toArray(AtomicLong[]::new);
     }
 

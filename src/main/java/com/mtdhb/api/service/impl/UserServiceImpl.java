@@ -15,12 +15,13 @@ import org.springframework.stereotype.Service;
 import com.mtdhb.api.autoconfigure.MailProperties;
 import com.mtdhb.api.autoconfigure.ThirdPartyApplicationProperties;
 import com.mtdhb.api.constant.CacheNames;
+import com.mtdhb.api.constant.e.CookieUseStatus;
 import com.mtdhb.api.constant.e.ErrorCode;
 import com.mtdhb.api.constant.e.Purpose;
 import com.mtdhb.api.constant.e.ThirdPartyApplication;
 import com.mtdhb.api.constant.e.VerificationType;
-import com.mtdhb.api.dao.CookieCountRepository;
 import com.mtdhb.api.dao.CookieRepository;
+import com.mtdhb.api.dao.CookieUseCountRepository;
 import com.mtdhb.api.dao.UserRepository;
 import com.mtdhb.api.dao.VerificationRepository;
 import com.mtdhb.api.dto.AccountDTO;
@@ -48,7 +49,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private CookieRepository cookieRepository;
     @Autowired
-    private CookieCountRepository cookieCountRepository;
+    private CookieUseCountRepository cookieUseCountRepository;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -167,10 +168,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public NumberDTO getNumber(ThirdPartyApplication application, long userId) {
         long total = cookieRepository.countByApplicationAndUserId(application, userId)
-                * thirdPartyApplicationProperties.getAvailables()[application.ordinal()];
-        long used = cookieCountRepository.countByApplicationAndUserIdAndGmtCreateGreaterThan(application, userId,
-                Timestamp.valueOf(LocalDate.now().atStartOfDay()));
+                * thirdPartyApplicationProperties.getDailies()[application.ordinal()];
+        long used = cookieUseCountRepository.countByStatusAndApplicationAndReceivingUserIdAndGmtCreateGreaterThan(
+                CookieUseStatus.SUCCESS, application, userId, Timestamp.valueOf(LocalDate.now().atStartOfDay()));
         NumberDTO numberDTO = new NumberDTO();
+        // TODO 还要减去检测到私用的次数
         numberDTO.setAvailable(total - used);
         numberDTO.setTotal(total);
         return numberDTO;

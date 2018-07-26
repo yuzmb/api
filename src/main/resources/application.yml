@@ -38,7 +38,7 @@ com:
                 minimums:
                     - 3.3
                     - 4.6
-                availables:
+                dailies:
                     - 3
                     - 5
             login-interceptor:

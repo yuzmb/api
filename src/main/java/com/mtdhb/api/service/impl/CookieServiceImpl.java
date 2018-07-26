@@ -27,16 +27,16 @@ import com.mtdhb.api.constant.e.ErrorCode;
 import com.mtdhb.api.constant.e.HttpService;
 import com.mtdhb.api.constant.e.ReceivingStatus;
 import com.mtdhb.api.constant.e.ThirdPartyApplication;
-import com.mtdhb.api.dao.CookieCountRepository;
 import com.mtdhb.api.dao.CookieRepository;
+import com.mtdhb.api.dao.CookieUseCountRepository;
 import com.mtdhb.api.dao.ReceivingRepository;
 import com.mtdhb.api.dto.CookieDTO;
 import com.mtdhb.api.dto.CookieRankDTO;
 import com.mtdhb.api.dto.nodejs.CookieCheckDTO;
 import com.mtdhb.api.entity.Cookie;
 import com.mtdhb.api.entity.Receiving;
-import com.mtdhb.api.entity.view.CookieCountView;
 import com.mtdhb.api.entity.view.CookieRankView;
+import com.mtdhb.api.entity.view.CookieUseCountView;
 import com.mtdhb.api.exception.BusinessException;
 import com.mtdhb.api.service.CookieService;
 import com.mtdhb.api.service.NodejsService;
@@ -63,7 +63,7 @@ public class CookieServiceImpl implements CookieService {
     @Autowired
     private CookieRepository cookieRepository;
     @Autowired
-    private CookieCountRepository cookieCountRepository;
+    private CookieUseCountRepository cookieUseCountRepository;
     @Autowired
     private ReceivingRepository receivingRepository;
     @Autowired
@@ -106,46 +106,30 @@ public class CookieServiceImpl implements CookieService {
 
     @Override
     public void load(ThirdPartyApplication application) {
-        log.info("{} queue loading...", application);
         LinkedBlockingQueue<Cookie> queue = queues.get(application.ordinal());
-        int total = thirdPartyApplicationProperties.getTotals()[application.ordinal()];
-        // 小于每个链接的红包个数要重新加载
-        while (queue.size() < total) {
-            AtomicLong endpoint = endpoints[application.ordinal()];
-            long lower = endpoint.get();
-            log.info("application={}, lower={}", application, lower);
-            Slice<Cookie> cookies = cookieRepository.findByApplicationAndIdGreaterThan(application, lower,
-                    PageRequest.of(0, CHUNK_SIZE));
-            int numberOfElements = cookies.getNumberOfElements();
-            log.info("cookies#size={}", numberOfElements);
-            if (numberOfElements < 1) {
-                return;
-            }
-            Cookie last = cookies.getContent().get(numberOfElements - 1);
-            long upper = last.getId();
-            log.info("upper={}", upper);
-            Timestamp today = Timestamp.valueOf(LocalDate.now().atStartOfDay());
-            List<CookieCountView> cookieCountViews = cookieCountRepository.findCookieCountView(application, today,
-                    lower, upper);
-            log.info("cookieCountViews#size={}", cookieCountViews.size());
-            cookieCountViews.stream().forEach(
-                    cookieCountView -> usage.putIfAbsent(cookieCountView.getOpenId(), cookieCountView.getCount()));
-            cookies.forEach(cookie -> {
-                String openId = cookie.getOpenId();
-                Long count = usage.get(openId);
-                if (count == null) {
-                    usage.put(openId, 0L);
-                    queue.offer(cookie);
-                } else if (count < thirdPartyApplicationProperties.getAvailables()[application.ordinal()]) {
-                    queue.offer(cookie);
-                } else {
-                    usage.remove(openId);
-                }
-            });
-            // 重设端点值
-            endpoint.set(upper + 1);
+        AtomicLong endpoint = endpoints[application.ordinal()];
+        long upper = endpoint.get();
+        long daily = thirdPartyApplicationProperties.getDailies()[application.ordinal()];
+        Timestamp today = Timestamp.valueOf(LocalDate.now().atStartOfDay());
+        log.info("upper={}, application={}, daily={}, today={}", upper, application, daily, today);
+        Slice<CookieUseCountView> cookieUseCountViews = cookieUseCountRepository.findCookieUseCountView(upper,
+                application, daily, today, PageRequest.of(0, CHUNK_SIZE));
+        int numberOfElements = cookieUseCountViews.getNumberOfElements();
+        log.info("cookieUseCountViews#size={}", numberOfElements);
+        if (numberOfElements < 1) {
+            return;
         }
-        log.info("application={}, usage#size={}, queues#size={}", application, usage.size(), queue.size());
+        CookieUseCountView last = cookieUseCountViews.getContent().get(numberOfElements - 1);
+        long newUpper = last.getId() + 1;
+        log.info("newUpper={}", newUpper);
+        // 重设端点值
+        endpoint.set(newUpper);
+        cookieUseCountViews.forEach(cookieUseCountView -> {
+            Cookie cookie = new Cookie();
+            BeanUtils.copyProperties(cookieUseCountView, cookie);
+            queue.offer(cookie);
+            usage.put(cookieUseCountView.getOpenId(), cookieUseCountView.getCount());
+        });
     }
 
     @Override
@@ -167,6 +151,10 @@ public class CookieServiceImpl implements CookieService {
         cookie.setUserId(userId);
         cookie.setGmtCreate(Timestamp.from(Instant.now()));
         cookieRepository.save(cookie);
+        if (usage.get(openId) == null) {
+            usage.put(openId, 0L);
+            queues.get(application.ordinal()).offer(cookie);
+        }
         CookieDTO cookieDTO = new CookieDTO();
         BeanUtils.copyProperties(cookie, cookieDTO);
         cookieDTO.setNickname(Entities.decodeNickname(cookie.getNickname()));
@@ -196,7 +184,7 @@ public class CookieServiceImpl implements CookieService {
                         receiving);
             }
             long available = userService.getAvailable(application, userId);
-            if (available < thirdPartyApplicationProperties.getAvailables()[application.ordinal()]) {
+            if (available < thirdPartyApplicationProperties.getDailies()[application.ordinal()]) {
                 throw new BusinessException(ErrorCode.COOKIE_DELETE_EXCEPTION,
                         "cookieId={}, application={}, userId={}, available={}", cookieId, application, userId,
                         available);

@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -26,24 +25,21 @@ import org.springframework.stereotype.Service;
 
 import com.mtdhb.api.autoconfigure.ThirdPartyApplicationProperties;
 import com.mtdhb.api.constant.CacheNames;
-import com.mtdhb.api.constant.e.CookieStatus;
+import com.mtdhb.api.constant.e.CookieUseStatus;
 import com.mtdhb.api.constant.e.ErrorCode;
 import com.mtdhb.api.constant.e.ReceivingStatus;
 import com.mtdhb.api.constant.e.ThirdPartyApplication;
-import com.mtdhb.api.dao.CookieCountRepository;
-import com.mtdhb.api.dao.CookieMarkRepository;
+import com.mtdhb.api.dao.CookieUseCountRepository;
 import com.mtdhb.api.dao.ReceivingRepository;
 import com.mtdhb.api.dto.ReceivingCarouselDTO;
 import com.mtdhb.api.dto.ReceivingDTO;
 import com.mtdhb.api.dto.ReceivingPieDTO;
 import com.mtdhb.api.dto.ReceivingTrendDTO;
-import com.mtdhb.api.dto.nodejs.CookieStatusDTO;
 import com.mtdhb.api.dto.nodejs.RedPacketDTO;
 import com.mtdhb.api.dto.nodejs.RedPacketResultDTO;
 import com.mtdhb.api.dto.nodejs.ResultDTO;
 import com.mtdhb.api.entity.Cookie;
-import com.mtdhb.api.entity.CookieCount;
-import com.mtdhb.api.entity.CookieMark;
+import com.mtdhb.api.entity.CookieUseCount;
 import com.mtdhb.api.entity.Receiving;
 import com.mtdhb.api.entity.view.ReceivingCarouselView;
 import com.mtdhb.api.entity.view.ReceivingPieView;
@@ -75,9 +71,7 @@ public class ReceivingServiceImpl implements ReceivingService {
     @Autowired
     private UserService userService;
     @Autowired
-    private CookieCountRepository cookieCountRepository;
-    @Autowired
-    private CookieMarkRepository cookieMarkRepository;
+    private CookieUseCountRepository cookieUseCountRepository;
     @Autowired
     private ReceivingRepository receivingRepository;
     @Autowired
@@ -207,15 +201,17 @@ public class ReceivingServiceImpl implements ReceivingService {
         receiving.setUserId(userId);
         receiving.setGmtCreate(Timestamp.from(Instant.now()));
         receivingRepository.save(receiving);
-        asyncService.dispatch(receiving, available);
         ReceivingDTO receivingDTO = new ReceivingDTO();
         BeanUtils.copyProperties(receiving, receivingDTO);
         receivingDTO.setPhone(Entities.encodePhone(receivingDTO.getPhone()));
+        asyncService.dispatch(receiving, available);
         return receivingDTO;
     }
 
     @Override
     public void dispatch(Receiving receiving, long available) {
+        // 先将领取状态设置为领取失败
+        receiving.setStatus(ReceivingStatus.FAILURE);
         ThirdPartyApplication application = receiving.getApplication();
         LinkedBlockingQueue<Cookie> queue = queues.get(application.ordinal());
         int total = thirdPartyApplicationProperties.getTotals()[application.ordinal()];
@@ -227,7 +223,10 @@ public class ReceivingServiceImpl implements ReceivingService {
             size = queue.size();
         }
         if (size < 1) {
-            saveFailedReceiving(receiving, ErrorCode.COOKIE_INSUFFICIENT.getMessage(), Timestamp.from(Instant.now()));
+            log.error("receiving={}, available={}, size={}", receiving, available, size);
+            receiving.setMessage(ErrorCode.COOKIE_INSUFFICIENT.getMessage());
+            receiving.setGmtModified(Timestamp.from(Instant.now()));
+            receivingRepository.save(receiving);
             return;
         }
         size = Math.min(size, total << 1);
@@ -235,6 +234,7 @@ public class ReceivingServiceImpl implements ReceivingService {
         for (int i = 0; i < size; i++) {
             Cookie cookie = queue.poll();
             if (cookie == null) {
+                log.error("queue#poll={}", cookie);
                 break;
             }
             cookies.add(cookie);
@@ -245,110 +245,77 @@ public class ReceivingServiceImpl implements ReceivingService {
     @Override
     public void receive(Receiving receiving, List<Cookie> cookies, long available) {
         Timestamp timestamp = Timestamp.from(Instant.now());
-        long userId = receiving.getUserId();
+        // 设置领取完成时间
+        receiving.setGmtModified(timestamp);
         String url = receiving.getUrl();
         String phone = receiving.getPhone();
         ThirdPartyApplication application = receiving.getApplication();
         LinkedBlockingQueue<Cookie> queue = queues.get(application.ordinal());
+        ResultDTO<RedPacketDTO> resultDTO = null;
         try {
-            ResultDTO<RedPacketDTO> resultDTO = nodejsService.getHongbao(url, phone, application, available, cookies);
-            RedPacketDTO redPacketDTO = resultDTO.getData();
-            if (redPacketDTO == null) {
-                // TODO 现在暂时不限制领取，异常情况 cookie 直接放回队列
-                cookies.stream().forEach(cookie -> queue.offer(cookie));
-                saveFailedReceiving(receiving, resultDTO.getMessage(), timestamp);
-                return;
+            resultDTO = nodejsService.getHongbao(url, phone, application, available, cookies);
+        } catch (IOException e) {
+            // TODO IOException 先记录错误日志，cookie 待处理
+            log.error("receiving={}, cookies={}, available={}", receiving, cookies, available, e);
+            receiving.setMessage(e.getClass().getSimpleName());
+            receivingRepository.save(receiving);
+            return;
+        }
+        int code = resultDTO.getCode();
+        // 设置领取结果信息
+        receiving.setMessage(resultDTO.getMessage());
+        if (code < 0) {
+            // TODO Node.js 服务抛出运行时异常先记录错误日志，cookie 待处理
+            log.error("receiving={}, cookies={}, available={}, code={}", receiving, cookies, available, code);
+            receivingRepository.save(receiving);
+            return;
+        }
+        AtomicInteger cookieUseSuccessCount = new AtomicInteger();
+        Map<Long, Cookie> cookiesToMap = cookies.stream().collect(Collectors.toMap(Cookie::getId, cookie -> cookie));
+        RedPacketDTO redPacketDTO = resultDTO.getData();
+        // 已使用的 cookie 处理
+        List<CookieUseCount> cookieUseCounts = redPacketDTO.getCookies().stream().map(cookieUseStatusDTO -> {
+            long cookieId = cookieUseStatusDTO.getId();
+            CookieUseStatus status = CookieUseStatus.values()[cookieUseStatusDTO.getStatus()];
+            if (status.equals(CookieUseStatus.SUCCESS)) {
+                cookieUseSuccessCount.incrementAndGet();
             }
-            // Cookie 的使用统计
-            List<CookieStatusDTO> cookieStatusDTOs = redPacketDTO.getCookies();
-            final AtomicInteger useCookieCount = new AtomicInteger();
-            final Map<Long, Integer> cookieStatus = cookieStatusDTOs.stream()
-                    .collect(Collectors.toMap(CookieStatusDTO::getId, CookieStatusDTO::getStatus));
-            List<CookieCount> cookieCounts = new LinkedList<>();
-            List<CookieMark> cookieMarks = new LinkedList<>();
-            cookies.forEach(cookie -> {
-                long cookieId = cookie.getId();
-                String openId = cookie.getOpenId();
-                Integer status = cookieStatus.get(cookieId);
-                if (status == null) {
-                    // 未使用的放回队列
-                    queue.offer(cookie);
-                } else if (status == CookieStatus.SUCCESS.ordinal()) {
-                    // 已使用
-                    useCookieCount.incrementAndGet();
-                    long n = usage.remove(openId) + 1;
-                    if (n < thirdPartyApplicationProperties.getAvailables()[application.ordinal()]) {
-                        usage.put(openId, n);
-                        // 未达到每人每天可以领红包的次数则放回队列
-                        queue.offer(cookie);
-                    }
-                    CookieCount count = new CookieCount();
-                    count.setApplication(application);
-                    count.setUserId(userId);
-                    count.setCookieId(cookieId);
-                    count.setOpenId(openId);
-                    count.setReceivingId(receiving.getId());
-                    count.setGmtCreate(timestamp);
-                    cookieCounts.add(count);
-                } else if (status == CookieStatus.INVALID.ordinal()) {
-                    // 失效 cookie 标记，可能是美团、饿了么更新了规则
-                    CookieMark cookieMark = new CookieMark();
-                    cookieMark.setApplication(application);
-                    cookieMark.setStatus(CookieStatus.INVALID);
-                    cookieMark.setCookieId(cookieId);
-                    cookieMark.setUserId(cookie.getUserId());
-                    cookieMark.setGmtCreate(timestamp);
-                    cookieMarks.add(cookieMark);
-                } else if (status == CookieStatus.LIMIT.ordinal()) {
-                    // 未达到每人每天可以领红包的次数就失效 cookie 处理
-                    CookieMark cookieMark = new CookieMark();
-                    cookieMark.setApplication(application);
-                    cookieMark.setStatus(CookieStatus.LIMIT);
-                    cookieMark.setCookieId(cookieId);
-                    cookieMark.setUserId(cookie.getUserId());
-                    cookieMark.setGmtCreate(timestamp);
-                    cookieMarks.add(cookieMark);
-                } else {
-                    queue.offer(cookie);
-                }
-            });
-            // TODO 可更优化为 mysql native 批量插入
-            if (cookieCounts.size() > 0) {
-                cookieCountRepository.saveAll(cookieCounts);
+            Cookie cookie = cookiesToMap.remove(cookieId);
+            String openId = cookie.getOpenId();
+            long n = usage.remove(openId) + 1L;
+            if (n < thirdPartyApplicationProperties.getDailies()[application.ordinal()]) {
+                usage.put(openId, n);
+                // 未达到每人每天可以领红包的次数的 cookie 放回队列
+                queue.offer(cookie);
             }
-            if (cookieMarks.size() > 0) {
-                cookieMarkRepository.saveAll(cookieMarks);
-            }
-            if (resultDTO.getCode() != 0) {
-                saveFailedReceiving(receiving, resultDTO.getMessage(), timestamp);
-                return;
-            }
-            if (useCookieCount.get() < 2) {
-                RedPacketResultDTO redPacketResultDTO = redPacketDTO.getResult();
-                receiving.setNickname(Entities.encodeNickname(redPacketResultDTO.getNickname()));
-                receiving.setPrice(redPacketResultDTO.getPrice());
-                receiving.setDate(redPacketResultDTO.getDate());
-                saveFailedReceiving(receiving, resultDTO.getMessage(), timestamp);
-                return;
-            }
+            CookieUseCount cookieUseCount = new CookieUseCount();
+            cookieUseCount.setStatus(status);
+            cookieUseCount.setApplication(application);
+            cookieUseCount.setOpenId(openId);
+            cookieUseCount.setCookieId(cookieId);
+            cookieUseCount.setCookieUserId(cookie.getUserId());
+            cookieUseCount.setReceivingId(receiving.getId());
+            cookieUseCount.setReceivingId(receiving.getUserId());
+            cookieUseCount.setGmtCreate(timestamp);
+            return cookieUseCount;
+        }).collect(Collectors.toList());
+        // TODO 可更优化为 mysql native 批量插入
+        cookieUseCountRepository.saveAll(cookieUseCounts);
+        // 未使用的 cookie 放回队列
+        cookiesToMap.forEach((id, cookie) -> {
+            queue.offer(cookie);
+        });
+        if (code == 0) {
             RedPacketResultDTO redPacketResultDTO = redPacketDTO.getResult();
             receiving.setNickname(Entities.encodeNickname(redPacketResultDTO.getNickname()));
             receiving.setPrice(redPacketResultDTO.getPrice());
             receiving.setDate(redPacketResultDTO.getDate());
-            receiving.setStatus(ReceivingStatus.SUCCESS);
-            receiving.setGmtModified(timestamp);
-            receivingRepository.save(receiving);
-        } catch (IOException e) {
-            log.error("receiving={}, cookies={}", receiving, cookies, e);
-            // TODO 现在暂时不限制领取，IO 异常 cookie 直接放回队列
-            cookies.stream().forEach(cookie -> {
-                queue.offer(cookie);
-            });
-            saveFailedReceiving(receiving, e.getMessage(), timestamp);
-        } catch (Exception e) {
-            log.error("receiving={}, cookies={}", receiving, cookies, e);
-            saveFailedReceiving(receiving, e.getMessage(), timestamp);
+            if (cookieUseSuccessCount.get() > 1) {
+                // 领取成功
+                receiving.setStatus(ReceivingStatus.SUCCESS);
+            }
         }
+        receivingRepository.save(receiving);
     }
 
     private long checkReceiveTime() {
@@ -369,14 +336,6 @@ public class ReceivingServiceImpl implements ReceivingService {
                     tomorrow);
         }
         return todayEpochMilli;
-    }
-
-    private void saveFailedReceiving(Receiving receiving, String message, Timestamp gmtModified) {
-        message = message.length() > 512 ? message.substring(0, 512) : message;
-        receiving.setMessage(message);
-        receiving.setStatus(ReceivingStatus.FAILURE);
-        receiving.setGmtModified(gmtModified);
-        receivingRepository.save(receiving);
     }
 
 }
