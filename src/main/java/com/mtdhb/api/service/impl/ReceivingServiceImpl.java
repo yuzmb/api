@@ -295,7 +295,7 @@ public class ReceivingServiceImpl implements ReceivingService {
             cookieUseCount.setCookieId(cookieId);
             cookieUseCount.setCookieUserId(cookie.getUserId());
             cookieUseCount.setReceivingId(receiving.getId());
-            cookieUseCount.setReceivingId(receiving.getUserId());
+            cookieUseCount.setReceivingUserId(receiving.getUserId());
             cookieUseCount.setGmtCreate(timestamp);
             return cookieUseCount;
         }).collect(Collectors.toList());
