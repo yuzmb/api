@@ -28,5 +28,9 @@ public class ThirdPartyApplicationProperties {
      * 每人每天可以领红包的次数
      */
     private long[] dailies;
+    /**
+     * 红包的唯一标识
+     */
+    private String[] uniques;
 
 }

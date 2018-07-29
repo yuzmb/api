@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mtdhb.api.autoconfigure.ThirdPartyApplicationProperties;
 import com.mtdhb.api.constant.SessionKeys;
 import com.mtdhb.api.constant.e.ErrorCode;
 import com.mtdhb.api.constant.e.ThirdPartyApplication;
@@ -59,6 +60,8 @@ public class UserController {
     private CookieService cookieService;
     @Autowired
     private ReceivingService receivingService;
+    @Autowired
+    private ThirdPartyApplicationProperties thirdPartyApplicationProperties;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public Result login(@RequestParam("account") String account, @RequestParam("password") String password) {
@@ -172,15 +175,16 @@ public class UserController {
             throw new BusinessException(ErrorCode.URL_ERROR, "url={}", url);
         }
         if (url.startsWith("https://h5.ele.me/hongbao/")) {
-            urlKey = getParmeter(spec.getRef(), "sn");
             application = ThirdPartyApplication.ELE;
         } else if (url.startsWith("https://activity.waimai.meituan.com/")
                 || url.startsWith("http://activity.waimai.meituan.com/")) {
-            urlKey = getParmeter(spec.getQuery(), "urlKey");
             application = ThirdPartyApplication.MEITUAN;
-        }
-        if (urlKey == null) {
+        } else {
             throw new BusinessException(ErrorCode.URL_ERROR, "url={}", url);
+        }
+        urlKey = getParmeter(spec.getQuery(), thirdPartyApplicationProperties.getUniques()[application.ordinal()]);
+        if (urlKey == null) {
+            throw new BusinessException(ErrorCode.URL_ERROR, "url={}, urlKey={}", url, urlKey);
         }
         String receivingLock = Synchronizes.buildReceivingLock(urlKey, application);
         String userReceiveLock = Synchronizes.buildUserReceiveLock(application, userId);

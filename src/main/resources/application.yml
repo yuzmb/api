@@ -41,6 +41,9 @@ com:
                 dailies:
                     - 3
                     - 5
+                uniques:
+                    - urlKey
+                    - sn
             login-interceptor:
                 include-patterns:
                     - "/**"
