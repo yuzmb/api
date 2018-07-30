@@ -150,7 +150,8 @@ public class UserController {
     }
 
     @RequestMapping(value = "/receiving", method = RequestMethod.POST)
-    public Result receiving(@RequestParam("url") String url, @RequestParam("phone") String phone) {
+    public Result receiving(@RequestParam("url") String url, @RequestParam("phone") String phone,
+            @RequestParam(value = "force", required = false, defaultValue = "0") int force) {
         UserDTO userDTO = RequestContextHolder.get();
         long userId = userDTO.getId();
         url = url.trim();
@@ -190,7 +191,7 @@ public class UserController {
         String userReceiveLock = Synchronizes.buildUserReceiveLock(application, userId);
         synchronized (receivingLock) {
             synchronized (userReceiveLock) {
-                receivingDTO = receivingService.save(urlKey, url, phone, application, userId);
+                receivingDTO = receivingService.save(urlKey, url, phone, application, userId, force);
             }
         }
         return Results.success(receivingDTO);

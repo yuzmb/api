@@ -172,20 +172,30 @@ public class ReceivingServiceImpl implements ReceivingService {
     }
 
     @Override
-    public ReceivingDTO save(String urlKey, String url, String phone, ThirdPartyApplication application, long userId) {
+    public ReceivingDTO save(String urlKey, String url, String phone, ThirdPartyApplication application, long userId,
+            int force) {
         checkReceiveTime();
         Receiving receiving = null;
-        receiving = receivingRepository.findByUrlKeyAndApplicationAndStatusNot(urlKey, application,
-                ReceivingStatus.FAILURE);
+        receiving = receivingRepository.findByUrlKeyAndApplicationAndStatus(urlKey, application, ReceivingStatus.ING);
         if (receiving != null) {
-            throw new BusinessException(ErrorCode.RED_PACKET_EXIST,
-                    "urlKey={}, application={}, status={}, receiving={}", urlKey, application, ReceivingStatus.FAILURE,
-                    receiving);
+            throw new BusinessException(ErrorCode.RECEIVE_ING, "urlKey={}, application={}, status={}, receiving={}",
+                    urlKey, application, ReceivingStatus.ING, receiving);
+        }
+        // 饿了么存在复用红包 sn 的情况，所以这里允许用户选择是否要领取已被领过的红包
+        if (force == 0) {
+            receiving = receivingRepository.findByUrlKeyAndApplicationAndStatus(urlKey, application,
+                    ReceivingStatus.SUCCESS);
+            if (receiving != null) {
+                throw new BusinessException(ErrorCode.RECEIVING_EXIST,
+                        "urlKey={}, application={}, status={}, receiving={}", urlKey, application,
+                        ReceivingStatus.SUCCESS, receiving);
+            }
         }
         receiving = receivingRepository.findByApplicationAndStatusAndUserId(application, ReceivingStatus.ING, userId);
         if (receiving != null) {
-            throw new BusinessException(ErrorCode.RECEIVE_WAIT, "application={}, status={}, userId={}, receiving={}",
-                    application, ReceivingStatus.ING, userId, receiving);
+            throw new BusinessException(ErrorCode.USER_RECEIVE_WAIT,
+                    "application={}, status={}, userId={}, receiving={}", application, ReceivingStatus.ING, userId,
+                    receiving);
         }
         long available = userService.getAvailable(application, userId);
         if (available < 2L) {
