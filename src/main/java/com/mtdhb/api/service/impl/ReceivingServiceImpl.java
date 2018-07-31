@@ -2,10 +2,10 @@ package com.mtdhb.api.service.impl;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -174,7 +174,26 @@ public class ReceivingServiceImpl implements ReceivingService {
     @Override
     public ReceivingDTO save(String urlKey, String url, String phone, ThirdPartyApplication application, long userId,
             int force) {
-        checkReceiveTime();
+        /*
+         * 每天零点时刻的前后一段时间内需要限制领取，防止以下原因导致 cookie 使用统计出错：
+         * 
+         * 1. 此系统的服务器时间已达 00:00，但美团或饿了么的服务器的时间还未到 00:00
+         * 2. 零点时刻要重置内存中的  cookie 使用统计数据
+         * 
+         * 限制领取的持续时间为 duration * 2 分钟
+         */
+        // TODO duration 配置
+        long duration = 10;
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime today = now.toLocalDate().atStartOfDay();
+        LocalDateTime tomorrow = today.plusDays(1);
+        if (Duration.between(today, now).toMinutes() < duration
+                || Duration.between(now, tomorrow).toMinutes() < duration) {
+            throw new BusinessException(ErrorCode.SYSTEM_MAINTENANCE.getCode(),
+                    String.format(ErrorCode.SYSTEM_MAINTENANCE.getMessage(),
+                            tomorrow.minusMinutes(duration).toLocalTime(), today.plusMinutes(duration).toLocalTime()),
+                    "now={}, today={}, tomorrow={}", now, today, tomorrow);
+        }
         Receiving receiving = null;
         receiving = receivingRepository.findByUrlKeyAndApplicationAndStatus(urlKey, application, ReceivingStatus.ING);
         if (receiving != null) {
@@ -326,26 +345,6 @@ public class ReceivingServiceImpl implements ReceivingService {
             }
         }
         receivingRepository.save(receiving);
-    }
-
-    private long checkReceiveTime() {
-        // 23:50 至 00:10 限制领取，防止当前服务时间已达 00:00，但是美团或饿了么的服务器的时间还未到 00:00，导致 cookie 使用统计出错
-        Instant now = Instant.now();
-        long nowEpochMilli = now.toEpochMilli();
-        LocalDateTime today = LocalDate.now().atStartOfDay();
-        LocalDateTime tomorrow = today.plusDays(1);
-        ZoneOffset defaultZoneOffset = ZoneOffset.ofHours(8);
-        log.info("now={}, today={}, tomorrow={}, defaultZoneOffset={}", now, today, tomorrow, defaultZoneOffset);
-        long todayEpochMilli = today.toInstant(defaultZoneOffset).toEpochMilli();
-        long tomorrowEpochMilli = tomorrow.toInstant(defaultZoneOffset).toEpochMilli();
-        // TODO 配置
-        long tenMinuteEpochMilli = 1000 * 60 * 10;
-        if (tomorrowEpochMilli - nowEpochMilli < tenMinuteEpochMilli
-                || nowEpochMilli - todayEpochMilli < tenMinuteEpochMilli) {
-            throw new BusinessException(ErrorCode.SYSTEM_MAINTENANCE, "now={}, today={}, tomorrow={}", now, today,
-                    tomorrow);
-        }
-        return todayEpochMilli;
     }
 
 }
