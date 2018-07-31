@@ -25,7 +25,9 @@ import javax.mail.internet.MimeUtility;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 由于免费企业邮箱有发送数量和频率的限制，不足以支撑我们网站的邮件发送； 而我们又买不起收费的，所以我们采用配置多个免费企业邮箱方式解决。
+ * 支持多邮箱配置的邮件发送类
+ * 
+ * <p>由于免费企业邮箱有发送数量和频率的限制，不足以支撑我们网站的邮件发送； 而我们 又买不起收费的，所以我们采用配置多个免费企业邮箱方式解决
  * 
  * @author i@huangdenghe.com
  * @date 2018/03/17
@@ -66,25 +68,29 @@ public class Mail {
     }
 
     /**
+     * 发送邮件
+     * 
      * @param to
-     *            收件人，多个收件人用;分隔
+     *            收件人，多个收件人用 {@code ;} 分隔
      * @param subject
      *            主题
      * @param content
      *            内容
-     * @return
+     * @return 如果邮件发送成功，则返回 {@code true}，否则返回 {@code false}
      */
     public boolean send(String to, String subject, String content) {
         return send(to, null, null, subject, content, null, null);
     }
 
     /**
+     * 发送邮件
+     * 
      * @param to
-     *            收件人，多个收件人用;分隔
+     *            收件人，多个收件人用 {@code ;} 分隔
      * @param cc
-     *            抄送，多个抄送用;分隔
+     *            抄送，多个抄送用 {@code ;} 分隔
      * @param bcc
-     *            密送，多个密送用;分隔
+     *            密送，多个密送用 {@code ;} 分隔
      * @param subject
      *            主题
      * @param content
@@ -93,7 +99,7 @@ public class Mail {
      *            内嵌图片
      * @param attachments
      *            附件
-     * @return
+     * @return 如果邮件发送成功，则返回 {@code true}，否则返回 {@code false}
      */
     public boolean send(String to, String cc, String bcc, String subject, String content, File[] images,
             File[] attachments) {
