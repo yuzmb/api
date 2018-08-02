@@ -167,9 +167,9 @@ public class Mail {
             transport.close();
             return true;
         } catch (Exception e) {
-            log.error(e.getMessage(), e,
-                    "index={}, properties={}, to={}, cc={}, bcc={}, subject={}, content{}, images={}, attachments={}",
-                    index, properties, to, cc, bcc, subject, content, images, attachments);
+            log.error(e.getMessage(),
+                    "index={}, properties={}, to={}, cc={}, bcc={}, subject={}, content={}, images={}, attachments={}",
+                    index, properties, to, cc, bcc, subject, content, images, attachments, e);
         }
         return false;
     }

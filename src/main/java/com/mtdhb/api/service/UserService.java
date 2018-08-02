@@ -14,7 +14,7 @@ import com.mtdhb.api.dto.UserDTO;
  */
 public interface UserService {
 
-    UserDTO loginByMail(String account, String password);
+    UserDTO loginByMail(String mail, String password);
 
     UserDTO registerByMail(AccountDTO accountDTO);
 

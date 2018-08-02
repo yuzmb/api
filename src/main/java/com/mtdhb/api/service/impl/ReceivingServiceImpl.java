@@ -178,7 +178,7 @@ public class ReceivingServiceImpl implements ReceivingService {
          * 每天零点时刻的前后一段时间内需要限制领取，防止以下原因导致 cookie 使用统计出错：
          * 
          * 1. 此系统的服务器时间已达 00:00，但美团或饿了么的服务器的时间还未到 00:00
-         * 2. 零点时刻要重置内存中的  cookie 使用统计数据
+         * 2. 零点时刻要重置内存中的 cookie 使用统计数据
          * 
          * 限制领取的持续时间为 duration * 2 分钟
          */
