@@ -120,7 +120,7 @@ public class CookieServiceImpl implements CookieService {
             return;
         }
         CookieUseCountView last = cookieUseCountViews.getContent().get(numberOfElements - 1);
-        long newUpper = last.getId() + 1;
+        long newUpper = last.getId();
         log.info("newUpper={}", newUpper);
         // 重设端点值
         endpoint.set(newUpper);
