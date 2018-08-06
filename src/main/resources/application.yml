@@ -37,7 +37,7 @@ com:
                     - 15
                 minimums:
                     - 3.3
-                    - 4.6
+                    - 4.5
                 dailies:
                     - 3
                     - 5
