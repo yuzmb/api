@@ -152,14 +152,8 @@ public class UserController {
     @RequestMapping(value = "/receiving", method = RequestMethod.POST)
     public Result receiving(@RequestParam("url") String url, @RequestParam("phone") String phone,
             @RequestParam(value = "force", required = false, defaultValue = "0") int force) {
-        UserDTO userDTO = RequestContextHolder.get();
-        long userId = userDTO.getId();
-        url = url.trim();
-        String urlKey = null;
-        ThirdPartyApplication application = null;
-        ReceivingDTO receivingDTO = null;
         // 某些地方复制出的链接带 &amp; 而不是 &
-        url = url.replace("&amp;", "&");
+        url = url.trim().replace("&amp;", "&");
         // 很多用户用手机复制链接的时候会带上末尾的 ]
         if (url.endsWith("]")) {
             url = url.substring(0, url.length() - 1);
@@ -175,20 +169,27 @@ public class UserController {
             log.warn("url={}", url, e);
             throw new BusinessException(ErrorCode.URL_ERROR, "url={}", url);
         }
+        String parameter = null;
+        ThirdPartyApplication application = null;
         if (url.startsWith("https://h5.ele.me/hongbao/")) {
+            parameter = spec.getRef();
             application = ThirdPartyApplication.ELE;
         } else if (url.startsWith("https://activity.waimai.meituan.com/")
                 || url.startsWith("http://activity.waimai.meituan.com/")) {
+            parameter = spec.getQuery();
             application = ThirdPartyApplication.MEITUAN;
         } else {
             throw new BusinessException(ErrorCode.URL_ERROR, "url={}", url);
         }
-        urlKey = getParmeter(spec.getQuery(), thirdPartyApplicationProperties.getUniques()[application.ordinal()]);
+        String urlKey = getParmeter(parameter, thirdPartyApplicationProperties.getUniques()[application.ordinal()]);
         if (urlKey == null) {
             throw new BusinessException(ErrorCode.URL_ERROR, "url={}, urlKey={}", url, urlKey);
         }
         String receivingLock = Synchronizes.buildReceivingLock(urlKey, application);
+        UserDTO userDTO = RequestContextHolder.get();
+        long userId = userDTO.getId();
         String userReceiveLock = Synchronizes.buildUserReceiveLock(application, userId);
+        ReceivingDTO receivingDTO = null;
         synchronized (receivingLock) {
             synchronized (userReceiveLock) {
                 receivingDTO = receivingService.save(urlKey, url, phone, application, userId, force);
