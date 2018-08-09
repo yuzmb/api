@@ -123,7 +123,7 @@ public class UserController {
         long userId = userDTO.getId();
         // 去除首尾空白字符
         value = value.trim();
-        // 处理兼容处理带 Cookie: 前缀的提交
+        // 处理带 Cookie: 前缀的提交
         if (PATTERN.matcher(value).matches()) {
             value = value.substring("Cookie:".length()).trim();
         }
@@ -227,7 +227,13 @@ public class UserController {
             return null;
         }
         Optional<String> optional = Stream.of(query.split("&")).filter(keyValue -> keyValue.startsWith(name + "="))
-                .map(keyValue -> keyValue.split("=")[1]).findFirst();
+                .map(keyValue -> {
+                    String[] array = keyValue.split("=");
+                    if (array.length == 2) {
+                        return array[1];
+                    }
+                    return null;
+                }).findFirst();
         return optional.orElse(null);
     }
 
