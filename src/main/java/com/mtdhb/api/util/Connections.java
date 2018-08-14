@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.MimeTypeUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,9 @@ public class Connections {
 
     private static final int DEFAULT_TIME_OUT = 1 * 60 * 1000;
 
+    private static final ObjectMapper MAPPER = new ObjectMapper()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
     public static String getRedirectURL(String spec) throws IOException {
         log.info("Redirect: spec={}", spec);
         HttpURLConnection connection = (HttpURLConnection) openConnection(spec);
@@ -37,8 +41,7 @@ public class Connections {
     }
 
     public static <T> T post(String spec, Object arg, TypeReference<?> valueTypeRef) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String parameter = objectMapper.writeValueAsString(arg);
+        String parameter = MAPPER.writeValueAsString(arg);
         log.info("Node.js request: spec={}, parameter={}", spec, parameter);
         URLConnection connection = openConnection(spec);
         connection.addRequestProperty(HttpHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE);
@@ -53,7 +56,7 @@ public class Connections {
             byte[] b = IOStreams.readAllBytes(in);
             String body = new String(b, StandardCharsets.UTF_8);
             log.info("Node.js response: body={}", body);
-            return objectMapper.readValue(body, valueTypeRef);
+            return MAPPER.readValue(body, valueTypeRef);
         }
     }
 
