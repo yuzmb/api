@@ -1,5 +1,7 @@
 package com.mtdhb.api.constant.e;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * @author i@huangdenghe.com
  * @date 2018/08/14
@@ -13,6 +15,11 @@ public enum ReceivingType {
     /**
      * 品质联盟专享红包
      */
-    QUALITY
+    QUALITY;
+
+    @JsonValue
+    public int getJsonValue() {
+        return ordinal();
+    }
 
 }
