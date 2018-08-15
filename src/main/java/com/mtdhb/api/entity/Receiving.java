@@ -10,6 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 import com.mtdhb.api.constant.e.ReceivingStatus;
+import com.mtdhb.api.constant.e.ReceivingType;
 import com.mtdhb.api.constant.e.ThirdPartyApplication;
 
 import lombok.Data;
@@ -30,6 +31,8 @@ public class Receiving {
     private String phone;
     @Enumerated
     private ThirdPartyApplication application;
+    @Enumerated
+    private ReceivingType type;
     @Enumerated
     private ReceivingStatus status;
     private String message;

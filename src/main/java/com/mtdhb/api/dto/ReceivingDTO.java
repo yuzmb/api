@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import com.mtdhb.api.constant.e.ReceivingStatus;
+import com.mtdhb.api.constant.e.ReceivingType;
 import com.mtdhb.api.constant.e.ThirdPartyApplication;
 
 import lombok.Data;
@@ -20,6 +21,7 @@ public class ReceivingDTO {
     private String url;
     private String phone;
     private ThirdPartyApplication application;
+    private ReceivingType type;
     private ReceivingStatus status;
     private BigDecimal price;
     private String message;

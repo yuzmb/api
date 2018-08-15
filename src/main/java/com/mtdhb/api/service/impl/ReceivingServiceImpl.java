@@ -28,6 +28,7 @@ import com.mtdhb.api.constant.CacheNames;
 import com.mtdhb.api.constant.e.CookieUseStatus;
 import com.mtdhb.api.constant.e.ErrorCode;
 import com.mtdhb.api.constant.e.ReceivingStatus;
+import com.mtdhb.api.constant.e.ReceivingType;
 import com.mtdhb.api.constant.e.ThirdPartyApplication;
 import com.mtdhb.api.dao.CookieUseCountRepository;
 import com.mtdhb.api.dao.ReceivingRepository;
@@ -341,6 +342,10 @@ public class ReceivingServiceImpl implements ReceivingService {
             receiving.setNickname(Entities.encodeNickname(redPacketResultDTO.getNickname()));
             receiving.setPrice(redPacketResultDTO.getPrice());
             receiving.setDate(redPacketResultDTO.getDate());
+            Integer type = redPacketResultDTO.getType();
+            if (type != null) {
+                receiving.setType(ReceivingType.values()[type]);
+            }
             if (cookieUseSuccessCount.get() > 1) {
                 // 领取成功
                 receiving.setStatus(ReceivingStatus.SUCCESS);

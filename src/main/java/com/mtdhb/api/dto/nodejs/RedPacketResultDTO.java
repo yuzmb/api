@@ -15,4 +15,6 @@ public class RedPacketResultDTO {
     private String nickname;
     private BigDecimal price;
     private String date;
+    private Integer type;
+
 }

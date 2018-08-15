@@ -12,6 +12,6 @@ public class CookieCheckDTO {
     private String openid;
     private String headimgurl;
     private String nickname;
-    private int service;
+    private Integer service;
 
 }

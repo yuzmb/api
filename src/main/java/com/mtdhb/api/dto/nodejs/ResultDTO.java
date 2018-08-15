@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class ResultDTO<T> {
 
-    public int code;
+    public Integer code;
     public String message;
     public T data;
 

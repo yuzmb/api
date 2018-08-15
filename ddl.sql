@@ -45,6 +45,7 @@ CREATE TABLE `receiving` (
   `url` varchar(512) NOT NULL,
   `phone` varchar(11) NOT NULL,
   `application` tinyint(1) NOT NULL,
+  `type` tinyint(1) DEFAULT NULL,
   `status` tinyint(1) NOT NULL,
   `message` varchar(512) DEFAULT NULL,
   `nickname` varchar(256) DEFAULT NULL,
