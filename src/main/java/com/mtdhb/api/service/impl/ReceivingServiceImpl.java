@@ -345,7 +345,7 @@ public class ReceivingServiceImpl implements ReceivingService {
             queue.offer(cookie);
         });
         RedPacketResultDTO redPacketResultDTO = redPacketDTO.getResult();
-        if (redPacketDTO != null) {
+        if (redPacketResultDTO != null) {
             Integer type = redPacketResultDTO.getType();
             if (type != null) {
                 receiving.setType(ReceivingType.values()[type]);
