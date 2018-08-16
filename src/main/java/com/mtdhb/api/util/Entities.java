@@ -26,14 +26,17 @@ public class Entities {
     }
 
     public static String encodeNickname(String nickname) {
+        if (nickname == null) {
+            return null;
+        }
         return Base64.encodeBase64String(nickname.getBytes(StandardCharsets.UTF_8));
     }
 
     public static String decodeNickname(String nickname) {
-        if (nickname != null) {
-            return new String(Base64.decodeBase64(nickname), StandardCharsets.UTF_8);
+        if (nickname == null) {
+            return null;
         }
-        return null;
+        return new String(Base64.decodeBase64(nickname), StandardCharsets.UTF_8);
     }
 
     public static String generateVerificationCode() {

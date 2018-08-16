@@ -36,6 +36,7 @@ import com.mtdhb.api.dto.ReceivingCarouselDTO;
 import com.mtdhb.api.dto.ReceivingDTO;
 import com.mtdhb.api.dto.ReceivingPieDTO;
 import com.mtdhb.api.dto.ReceivingTrendDTO;
+import com.mtdhb.api.dto.nodejs.CookieUseStatusDTO;
 import com.mtdhb.api.dto.nodejs.RedPacketDTO;
 import com.mtdhb.api.dto.nodejs.RedPacketResultDTO;
 import com.mtdhb.api.dto.nodejs.ResultDTO;
@@ -276,9 +277,6 @@ public class ReceivingServiceImpl implements ReceivingService {
 
     @Override
     public void receive(Receiving receiving, List<Cookie> cookies, long available) {
-        Timestamp timestamp = Timestamp.from(Instant.now());
-        // 设置领取完成时间
-        receiving.setGmtModified(timestamp);
         String url = receiving.getUrl();
         String phone = receiving.getPhone();
         ThirdPartyApplication application = receiving.getApplication();
@@ -290,23 +288,32 @@ public class ReceivingServiceImpl implements ReceivingService {
             // TODO IOException 先记录错误日志，cookie 待处理
             log.error("receiving={}, cookies={}, available={}", receiving, cookies, available, e);
             receiving.setMessage(e.getClass().getSimpleName());
+            receiving.setGmtModified(Timestamp.from(Instant.now()));
             receivingRepository.save(receiving);
             return;
         }
-        int code = resultDTO.getCode();
-        // 设置领取结果信息
+        Timestamp timestamp = Timestamp.from(Instant.now());
+        // 设置领取完成时间
+        receiving.setGmtModified(timestamp);
         receiving.setMessage(resultDTO.getMessage());
-        if (code < 0) {
-            // TODO Node.js 服务抛出运行时异常先记录错误日志，cookie 待处理
-            log.error("receiving={}, cookies={}, available={}, code={}", receiving, cookies, available, code);
+        RedPacketDTO redPacketDTO = resultDTO.getData();
+        if (redPacketDTO == null) {
+            // TODO Node.js 服务抛出运行时异常才会导致 redPacketDTO 为 null，先记录错误日志，cookie 待处理
+            log.error("receiving={}, cookies={}, available={}, resultDTO={}", receiving, cookies, available, resultDTO);
+            receivingRepository.save(receiving);
+            return;
+        }
+        List<CookieUseStatusDTO> cookieUseStatusDTOs = redPacketDTO.getCookies();
+        if (cookieUseStatusDTOs == null) {
+            // TODO Node.js 服务抛出运行时异常才会导致 cookieUseStatusDTOs 为 null，先记录错误日志，cookie 待处理
+            log.error("receiving={}, cookies={}, available={}, resultDTO={}", receiving, cookies, available, resultDTO);
             receivingRepository.save(receiving);
             return;
         }
         AtomicInteger cookieUseSuccessCount = new AtomicInteger();
         Map<Long, Cookie> cookiesToMap = cookies.stream().collect(Collectors.toMap(Cookie::getId, cookie -> cookie));
-        RedPacketDTO redPacketDTO = resultDTO.getData();
         // 已使用的 cookie 处理
-        List<CookieUseCount> cookieUseCounts = redPacketDTO.getCookies().stream().map(cookieUseStatusDTO -> {
+        List<CookieUseCount> cookieUseCounts = cookieUseStatusDTOs.stream().map(cookieUseStatusDTO -> {
             long cookieId = cookieUseStatusDTO.getId();
             CookieUseStatus status = CookieUseStatus.values()[cookieUseStatusDTO.getStatus()];
             if (status.equals(CookieUseStatus.SUCCESS)) {
@@ -337,19 +344,19 @@ public class ReceivingServiceImpl implements ReceivingService {
         cookiesToMap.forEach((id, cookie) -> {
             queue.offer(cookie);
         });
-        if (code == 0) {
-            RedPacketResultDTO redPacketResultDTO = redPacketDTO.getResult();
-            receiving.setNickname(Entities.encodeNickname(redPacketResultDTO.getNickname()));
-            receiving.setPrice(redPacketResultDTO.getPrice());
-            receiving.setDate(redPacketResultDTO.getDate());
+        RedPacketResultDTO redPacketResultDTO = redPacketDTO.getResult();
+        if (redPacketDTO != null) {
             Integer type = redPacketResultDTO.getType();
             if (type != null) {
                 receiving.setType(ReceivingType.values()[type]);
             }
-            if (cookieUseSuccessCount.get() > 1) {
-                // 领取成功
-                receiving.setStatus(ReceivingStatus.SUCCESS);
-            }
+            receiving.setNickname(Entities.encodeNickname(redPacketResultDTO.getNickname()));
+            receiving.setPrice(redPacketResultDTO.getPrice());
+            receiving.setDate(redPacketResultDTO.getDate());
+        }
+        if (resultDTO.getCode() == 0 && cookieUseSuccessCount.get() > 1) {
+            // 领取成功
+            receiving.setStatus(ReceivingStatus.SUCCESS);
         }
         receivingRepository.save(receiving);
     }
