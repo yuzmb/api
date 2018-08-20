@@ -30,11 +30,11 @@ public class MailAutoConfiguration {
 
     @PostConstruct
     public void readDefaultMailTemplate() {
-        if (this.properties.getRegisterMailTemplate() == null) {
-            this.properties.setRegisterMailTemplate(read(this.properties.getRegisterMailTemplatePath()));
+        if (properties.getRegisterMailTemplate() == null) {
+            properties.setRegisterMailTemplate(read(properties.getRegisterMailTemplatePath()));
         }
-        if (this.properties.getResetPasswordMailTemplate() == null) {
-            this.properties.setResetPasswordMailTemplate(read(this.properties.getResetPasswordMailTemplatePath()));
+        if (properties.getResetPasswordMailTemplate() == null) {
+            properties.setResetPasswordMailTemplate(read(properties.getResetPasswordMailTemplatePath()));
         }
     }
 

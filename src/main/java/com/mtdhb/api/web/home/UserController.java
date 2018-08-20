@@ -3,7 +3,7 @@ package com.mtdhb.api.web.home;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,7 +15,6 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -152,39 +151,39 @@ public class UserController {
     @RequestMapping(value = "/receiving", method = RequestMethod.POST)
     public Result receiving(@RequestParam("url") String url, @RequestParam("phone") String phone,
             @RequestParam(value = "force", required = false, defaultValue = "0") int force) {
+        phone = phone.trim();
         // 某些地方复制出的链接带 &amp; 而不是 &
         url = url.trim().replace("&amp;", "&");
         // 很多用户用手机复制链接的时候会带上末尾的 ]
         if (url.endsWith("]")) {
             url = url.substring(0, url.length() - 1);
         }
-        URL spec = null;
         try {
             // 支持 url.cn 的短链接
             if (url.startsWith("https://url.cn/") || url.startsWith("http://url.cn/")) {
                 url = Connections.getRedirectURL(url);
+            } else {
+                // see org.hibernate.validator.internal.constraintvalidators.hv.URLValidator
+                new URL(url);
             }
-            spec = new URL(url);
         } catch (Exception e) {
             log.warn("url={}", url, e);
             throw new BusinessException(ErrorCode.URL_ERROR, "url={}", url);
         }
-        String parameter = null;
         ThirdPartyApplication application = null;
         if (url.startsWith("https://h5.ele.me/hongbao/")) {
-            parameter = spec.getRef();
             application = ThirdPartyApplication.ELE;
         } else if (url.startsWith("https://activity.waimai.meituan.com/")
                 || url.startsWith("http://activity.waimai.meituan.com/")) {
-            parameter = spec.getQuery();
             application = ThirdPartyApplication.MEITUAN;
         } else {
             throw new BusinessException(ErrorCode.URL_ERROR, "url={}", url);
         }
-        String urlKey = getParmeter(parameter, thirdPartyApplicationProperties.getUniques()[application.ordinal()]);
-        if (urlKey == null) {
-            throw new BusinessException(ErrorCode.URL_ERROR, "url={}, urlKey={}", url, urlKey);
+        Matcher matcher = thirdPartyApplicationProperties.getPatterns()[application.ordinal()].matcher(url);
+        if (!matcher.find()) {
+            throw new BusinessException(ErrorCode.URL_ERROR, "url={}", url);
         }
+        String urlKey = matcher.group(1);
         String receivingLock = Synchronizes.buildReceivingLock(urlKey, application);
         UserDTO userDTO = RequestContextHolder.get();
         long userId = userDTO.getId();
@@ -220,21 +219,6 @@ public class UserController {
         return Results.success(Stream.of(ThirdPartyApplication.values())
                 .collect(Collectors.toMap(application -> application.name().toLowerCase(),
                         application -> userService.getNumber(application, userDTO.getId()))));
-    }
-
-    private String getParmeter(String query, String name) {
-        if (StringUtils.isEmpty(query) || StringUtils.isEmpty(name)) {
-            return null;
-        }
-        Optional<String> optional = Stream.of(query.split("&")).filter(keyValue -> keyValue.startsWith(name + "="))
-                .map(keyValue -> {
-                    String[] array = keyValue.split("=");
-                    if (array.length == 2) {
-                        return array[1];
-                    }
-                    return null;
-                }).findFirst();
-        return optional.orElse(null);
     }
 
     private void checkCaptcha(String captcha, String sessionKey, HttpSession session) {
