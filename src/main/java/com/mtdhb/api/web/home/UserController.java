@@ -51,7 +51,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UserController {
 
-    private static final Pattern PATTERN = Pattern.compile("^Cookie:.+", Pattern.CASE_INSENSITIVE);
+    private static final Pattern COOKIE_PATTERN = Pattern.compile("^Cookie:.+", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^1\\d{10}$");
 
     @Autowired
     private UserService userService;
@@ -123,7 +124,7 @@ public class UserController {
         // 去除首尾空白字符
         value = value.trim();
         // 处理带 Cookie: 前缀的提交
-        if (PATTERN.matcher(value).matches()) {
+        if (COOKIE_PATTERN.matcher(value).matches()) {
             value = value.substring("Cookie:".length()).trim();
         }
         ThirdPartyApplication[] applications = ThirdPartyApplication.values();
@@ -152,6 +153,9 @@ public class UserController {
     public Result receiving(@RequestParam("url") String url, @RequestParam("phone") String phone,
             @RequestParam(value = "force", required = false, defaultValue = "0") int force) {
         phone = phone.trim();
+        if (!phone.equals("") && !PHONE_PATTERN.matcher(phone).matches()) {
+            throw new BusinessException(ErrorCode.PHONE_ERROR, "phone={}", phone);
+        }
         // 某些地方复制出的链接带 &amp; 而不是 &
         url = url.trim().replace("&amp;", "&");
         // 很多用户用手机复制链接的时候会带上末尾的 ]
@@ -162,10 +166,9 @@ public class UserController {
             // 支持 url.cn 的短链接
             if (url.startsWith("https://url.cn/") || url.startsWith("http://url.cn/")) {
                 url = Connections.getRedirectURL(url);
-            } else {
-                // see org.hibernate.validator.internal.constraintvalidators.hv.URLValidator
-                new URL(url);
             }
+            // see org.hibernate.validator.internal.constraintvalidators.hv.URLValidator
+            new URL(url);
         } catch (Exception e) {
             log.warn("url={}", url, e);
             throw new BusinessException(ErrorCode.URL_ERROR, "url={}", url);

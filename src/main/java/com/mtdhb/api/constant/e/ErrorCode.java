@@ -34,7 +34,8 @@ public enum ErrorCode {
     MAIL_NOT_EXIST(10018, "邮箱不存在！"),
     USER_LOCKED(10019, "账号已被封禁！"),
     COOKIE_MEITUAN_DELETE_FAILURE(10020, "由于目前可用的美团 cookie 均已绝版，为了防止用户误删，暂时禁止删除。如确定要删除，请联系管理员！"),
-    MAIL_ON_BLACKLIST(10021, "禁止使用临时邮箱注册！");
+    MAIL_ON_BLACKLIST(10021, "禁止使用临时邮箱注册！"),
+    PHONE_ERROR(10022, "请填写 11 位手机号码或留空不填！");
 
     private int code;
     private String message;
