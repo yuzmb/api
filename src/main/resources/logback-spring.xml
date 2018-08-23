@@ -82,7 +82,9 @@
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="CONSOLE" />
+        <springProfile name="dev">
+            <appender-ref ref="CONSOLE" />
+        </springProfile>
         <appender-ref ref="INFO_FILE" />
         <appender-ref ref="WARN_FILE" />
         <appender-ref ref="ERROR_FILE" />
