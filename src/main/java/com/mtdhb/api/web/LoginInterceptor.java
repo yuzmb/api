@@ -29,23 +29,28 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
+        String remoteAddr = request.getRemoteAddr();
+        String forwardedFor = request.getHeader(CustomHttpHeaders.X_FORWARDED_FOR);
         String method = request.getMethod();
         String uri = request.getRequestURI();
         String userToken = request.getHeader(CustomHttpHeaders.X_USER_TOKEN);
-        log.info("method={}, uri={}, userToken={}", method, uri, userToken);
+        log.info("remoteAddr={}, forwardedFor={}, method={}, uri={}, userToken={}", remoteAddr, forwardedFor, method,
+                uri, userToken);
         if (userToken == null) {
-            throw new BusinessException(ErrorCode.AUTHENTICATION_EXCEPTION, "method={}, uri={}, userToken={}", method,
+            throw new BusinessException(ErrorCode.AUTHENTICATION_EXCEPTION,
+                    "remoteAddr={}, forwardedFor={}, method={}, uri={}, userToken={}", remoteAddr, forwardedFor, method,
                     uri, userToken);
         }
         UserDTO userDTO = userService.getByToken(userToken);
         if (userDTO == null) {
             throw new BusinessException(ErrorCode.AUTHENTICATION_EXCEPTION,
-                    "method={}, uri={}, userToken={}, userDTO={}", method, uri, userToken, userDTO);
-
+                    "remoteAddr={}, forwardedFor={}, method={}, uri={}, userToken={}, userDTO={}", remoteAddr,
+                    forwardedFor, method, uri, userToken, userDTO);
         }
         if (userDTO.getLocked()) {
-            throw new BusinessException(ErrorCode.USER_LOCKED, "method={}, uri={}, userToken={}, userDTO={}", method,
-                    uri, userToken, userDTO);
+            throw new BusinessException(ErrorCode.USER_LOCKED,
+                    "remoteAddr={}, forwardedFor={}, method={}, uri={}, userToken={}, userDTO={}", remoteAddr,
+                    forwardedFor, method, uri, userToken, userDTO);
         }
         RequestContextHolder.set(userDTO);
         return true;

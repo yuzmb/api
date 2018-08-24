@@ -8,9 +8,8 @@ package com.mtdhb.api.constant;
  */
 public class CustomHttpHeaders {
 
-    /**
-     * 用户令牌
-     */
     public static final String X_USER_TOKEN = "X-User-Token";
+
+    public static final String X_FORWARDED_FOR = "X-Forwarded-For";
 
 }
