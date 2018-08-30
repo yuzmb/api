@@ -9,6 +9,7 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.MimeTypeUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -34,7 +35,12 @@ public class Connections {
         HttpURLConnection connection = (HttpURLConnection) openConnection(spec);
         // 禁止重定向
         connection.setInstanceFollowRedirects(false);
-        String location = connection.getHeaderField(HttpHeaders.LOCATION);
+        int responseCode = connection.getResponseCode();
+        log.info("Redirect: responseCode={}", responseCode);
+        String location = null;
+        if (responseCode == HttpStatus.FOUND.value()) {
+            location = connection.getHeaderField(HttpHeaders.LOCATION);
+        }
         log.info("Redirect: location={}", location);
         return location;
 
@@ -45,8 +51,6 @@ public class Connections {
         log.info("Node.js request: spec={}, parameter={}", spec, parameter);
         URLConnection connection = openConnection(spec);
         connection.addRequestProperty(HttpHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE);
-        connection.setConnectTimeout(DEFAULT_TIME_OUT);
-        connection.setReadTimeout(DEFAULT_TIME_OUT);
         connection.setDoOutput(true);
         try (OutputStream out = connection.getOutputStream();) {
             out.write(parameter.getBytes(StandardCharsets.UTF_8));
@@ -62,7 +66,10 @@ public class Connections {
 
     private static URLConnection openConnection(String spec) throws IOException {
         URL url = new URL(spec);
-        return url.openConnection();
+        URLConnection connection = url.openConnection();
+        connection.setConnectTimeout(DEFAULT_TIME_OUT);
+        connection.setReadTimeout(DEFAULT_TIME_OUT);
+        return connection;
     }
 
 }
