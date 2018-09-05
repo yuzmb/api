@@ -6,8 +6,6 @@ import java.time.temporal.ChronoField;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,7 +34,7 @@ public class HomeController {
     private ChronoField[] chronoFields = { ChronoField.DAY_OF_WEEK, ChronoField.DAY_OF_MONTH, ChronoField.DAY_OF_YEAR };
 
     @RequestMapping("/user")
-    public Result user(HttpSession session) {
+    public Result user() {
         UserDTO userDTO = RequestContextHolder.get();
         // 只在注册和登录接口返回 token
         userDTO.setToken(null);

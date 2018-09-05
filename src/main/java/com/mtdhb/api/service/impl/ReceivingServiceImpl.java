@@ -196,12 +196,11 @@ public class ReceivingServiceImpl implements ReceivingService {
                             tomorrow.minusMinutes(duration).toLocalTime(), today.plusMinutes(duration).toLocalTime()),
                     "now={}, today={}, tomorrow={}", now, today, tomorrow);
         }
-        Receiving receiving = null;
         List<Receiving> receivings = receivingRepository.findByUrlKeyAndApplicationAndStatus(urlKey, application,
                 ReceivingStatus.ING);
         if (receivings.size() > 0) {
-            throw new BusinessException(ErrorCode.RECEIVE_ING, "urlKey={}, application={}, status={}, receiving={}",
-                    urlKey, application, ReceivingStatus.ING, receiving);
+            throw new BusinessException(ErrorCode.RECEIVE_ING, "urlKey={}, application={}, status={}, receivings={}",
+                    urlKey, application, ReceivingStatus.ING, receivings);
         }
         // 饿了么存在复用红包 sn 的情况，所以这里允许用户选择是否要领取已被领过的红包
         if (force == 0) {
@@ -210,11 +209,12 @@ public class ReceivingServiceImpl implements ReceivingService {
             if (receivings.size() > 0) {
                 // TODO 返回最近一次领取时间
                 throw new BusinessException(ErrorCode.RECEIVING_EXIST,
-                        "urlKey={}, application={}, status={}, receiving={}", urlKey, application,
-                        ReceivingStatus.SUCCESS, receiving);
+                        "urlKey={}, application={}, status={}, receivings={}", urlKey, application,
+                        ReceivingStatus.SUCCESS, receivings);
             }
         }
-        receiving = receivingRepository.findByApplicationAndStatusAndUserId(application, ReceivingStatus.ING, userId);
+        Receiving receiving = receivingRepository.findByApplicationAndStatusAndUserId(application, ReceivingStatus.ING,
+                userId);
         if (receiving != null) {
             throw new BusinessException(ErrorCode.USER_RECEIVE_WAIT,
                     "application={}, status={}, userId={}, receiving={}", application, ReceivingStatus.ING, userId,
