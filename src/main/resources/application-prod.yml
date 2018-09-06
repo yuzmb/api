@@ -3,3 +3,5 @@ spring:
         url: jdbc:mysql://127.0.0.1:3306/api?useUnicode=true&characterEncoding=UTF-8&useSSL=false
         username: 
         password: 
+        hikari:
+            maximum-pool-size: 32
