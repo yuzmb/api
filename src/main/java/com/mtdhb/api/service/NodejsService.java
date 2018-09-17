@@ -15,7 +15,7 @@ import com.mtdhb.api.entity.Cookie;
  */
 public interface NodejsService {
 
-    CookieCheckDTO checkCookie(String cookieValue, ThirdPartyApplication application) throws IOException;
+    CookieCheckDTO checkCookie(String cookieValue, ThirdPartyApplication application, long userId) throws IOException;
 
     ResultDTO<RedPacketDTO> getHongbao(String url, String phone, ThirdPartyApplication application, long limit,
             List<Cookie> cookies) throws IOException;

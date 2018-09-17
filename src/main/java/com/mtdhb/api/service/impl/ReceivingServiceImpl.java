@@ -178,10 +178,10 @@ public class ReceivingServiceImpl implements ReceivingService {
             int force) {
         /*
          * 每天零点时刻的前后一段时间内需要限制领取，防止以下原因导致 cookie 使用统计出错：
-         * 
+         *
          * 1. 此系统的服务器时间已达 00:00，但美团或饿了么的服务器的时间还未到 00:00
          * 2. 零点时刻要重置内存中的 cookie 使用统计数据
-         * 
+         *
          * 限制领取的持续时间为 duration * 2 分钟
          */
         // TODO duration 配置
@@ -251,20 +251,21 @@ public class ReceivingServiceImpl implements ReceivingService {
         int size = queue.size();
         log.info("queue#size={}", size);
         // 小于每个链接的红包个数要重新加载
-        if (size < total) {
-            cookieService.load(application);
-            size = queue.size();
-        }
-        if (size < 1) {
-            log.error("receiving={}, available={}, size={}", receiving, available, size);
-            receiving.setMessage(ErrorCode.COOKIE_INSUFFICIENT.getMessage());
-            receiving.setGmtModified(Timestamp.from(Instant.now()));
-            receivingRepository.save(receiving);
-            return;
-        }
-        size = Math.min(size, total << 1);
+        // if (size < total) {
+        //     cookieService.load(application);
+        //     size = queue.size();
+        // }
+        // if (size < 1) {
+        //     log.error("receiving={}, available={}, size={}", receiving, available, size);
+        //     receiving.setMessage(ErrorCode.COOKIE_INSUFFICIENT.getMessage());
+        //     receiving.setGmtModified(Timestamp.from(Instant.now()));
+        //     receivingRepository.save(receiving);
+        //     return;
+        // }
+        // size = Math.min(size, total << 1);
         List<Cookie> cookies = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
+        // for (int i = 0; i < size; i++) {
+        for (int i = 0; i < total; i++) {
             Cookie cookie = queue.poll();
             if (cookie == null) {
                 log.error("queue#poll={}", cookie);

@@ -134,7 +134,8 @@ public class CookieServiceImpl implements CookieService {
 
     @Override
     public CookieDTO save(String cookieValue, ThirdPartyApplication application, long userId) throws IOException {
-        CookieCheckDTO cookieCheckDTO = nodejsService.checkCookie(cookieValue, application);
+        // CookieCheckDTO cookieCheckDTO = nodejsService.checkCookie(cookieValue, application);
+        CookieCheckDTO cookieCheckDTO = nodejsService.checkCookie(cookieValue, application, userId);
         String openId = cookieCheckDTO.getOpenid();
         Cookie cookie = cookieRepository.findByOpenId(openId);
         if (cookie != null) {

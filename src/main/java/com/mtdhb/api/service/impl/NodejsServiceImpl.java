@@ -30,11 +30,14 @@ public class NodejsServiceImpl implements NodejsService {
     private NodejsProperties nodejsProperties;
 
     @Override
-    public CookieCheckDTO checkCookie(String cookieValue, ThirdPartyApplication application) throws IOException {
+    // public CookieCheckDTO checkCookie(String cookieValue, ThirdPartyApplication application) throws IOException {
+    public CookieCheckDTO checkCookie(String cookieValue, ThirdPartyApplication application, long userId) throws IOException {
         String spec = nodejsProperties.getUrl() + nodejsProperties.getCheckCookie();
         Map<String, Object> arg = new HashMap<>();
         arg.put("cookie", cookieValue);
         arg.put("application", application.ordinal());
+        // 管理员userId现在是2,在node端判断userId的值，不懂java只能这样改
+        arg.put("userId", userId);
         ResultDTO<CookieCheckDTO> resultDTO = Connections.post(spec, arg,
                 new TypeReference<ResultDTO<CookieCheckDTO>>() {
                 });
